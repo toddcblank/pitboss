@@ -1,0 +1,12 @@
+<html>
+<head>
+    <title>Create Game</title>
+</head>
+<body>
+    <form action="/pokerroom/game/create" method="post">
+        {% csrf_token %}
+        Buyin:  <input type="text" name="buyin" value="20"/>
+        <input type="submit" value="Create">
+    </form>
+</body>
+</html>

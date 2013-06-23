@@ -1,0 +1,27 @@
+<h1>{{ player }}</h1>
+
+<ul>
+    <img src="http://www.gravatar.com/avatar/{{ player.gravatarId }}"/>
+    <li>{{ player.name }}</li>
+    <li>Total Won: ${{ totalWon }}</li>
+    <li>Total Spent: ${{ totalSpent }}</li>
+    <li>Total Profit: ${{ totalProfit }}</li>
+    <li>Average Profit: ${{ averageProfit }}</li>
+
+
+    <h1>Results</h1>
+    <table>
+        <thead>
+        <td>Game</td>
+        <td>Place</td>
+        <td>Profit</td>
+        </thead>
+    {% for result in results %}
+        <tr>
+        <td><a href="/pokerroom/game/{{ result.game.id }}">{{ result.game }}</a></td>
+        <td>{{ result.place }}</td>
+        <td>{{ result.profit }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+</ul>

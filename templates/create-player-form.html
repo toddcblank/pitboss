@@ -1,0 +1,14 @@
+<html>
+<head>
+    <title>Create Player</title>
+</head>
+<body>
+    <form action="/pokerroom/player/create" method="post">
+        {% csrf_token %}
+        Name: <input type="text" name="name"><br/>
+        Nickname: <input type="text" name="nickname"><br/>
+        Email: <input type="email" name="email"><br/>
+        <input type="submit" value="Create"><br/>
+    </form>
+</body>
+</html>

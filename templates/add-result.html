@@ -1,0 +1,41 @@
+<html>
+<head>
+    <title>Add Result for {{ game }}</title>
+    Game: {{ game }}<br/>
+</head>
+
+<body>
+
+<form action="/pokerroom/result/{{ game.id }}/add-result" method="post">
+    {% csrf_token %}
+    Player: <select name="playerId">
+    {% for player in players %}
+        {% if player.id not in eliminatedPlayers %}
+            <option value="{{ player.id }}">{{ player }}</option>
+        {% endif %}
+    {% endfor %}
+</select> <a href="/pokerroom/player/create-form" target="_blank">Add New</a>
+    <br/>
+    Seat: <input type="text" name="seat"/><br/>
+    Place: <input type="place" name="place" value="{{ nextPlace }}"/><br/>
+    Amount Won: <input type="amountWon" name="amountWon"/><br/>
+    <input type="submit" value="Add">
+</form>
+
+<table>
+    <thead>
+    <td>Place</td>
+    <td colspan="2">Player</td>
+    <td>Amount Won</td>
+    </thead>
+    {% for result in currentResults %}
+        <tr>
+            <td>{{ result.place }}</td>
+            <td><img src="http://www.gravatar.com/avatar/{{ result.player.gravatarId }}"/></td>
+            <td>{{ result.player.name }}</td>
+            <td>{{ result.amountWon }}</td>
+        </tr>
+    {% endfor %}
+</table>
+</body>
+</html>
