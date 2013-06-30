@@ -1,2 +1,3 @@
+*.sqllitedb
 *.idea
 *.pyc
