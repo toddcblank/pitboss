@@ -1,8 +1,9 @@
+{% include "header.html" %}
 <h1>{{ player }}</h1>
 
 <ul>
     <img src="http://www.gravatar.com/avatar/{{ player.gravatarId }}"/>
-    <li>{{ player.name }}</li>
+
     <li>Total Won: ${{ totalWon }}</li>
     <li>Total Spent: ${{ totalSpent }}</li>
     <li>Total Profit: ${{ totalProfit }}</li>
@@ -10,7 +11,7 @@
 
 
     <h1>Results</h1>
-    <table>
+    <table class="table table-hover" style="width: auto">
         <thead>
         <td>Game</td>
         <td>Place</td>

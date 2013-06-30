@@ -1,8 +1,4 @@
-<html>
-<head>
-    <title>Add Result for {{ game }}</title>
-    Game: {{ game }}<br/>
-</head>
+{% include "header.html" %}
 
 <body>
 
@@ -18,11 +14,11 @@
     <br/>
     Seat: <input type="text" name="seat"/><br/>
     Place: <input type="place" name="place" value="{{ nextPlace }}"/><br/>
-    Amount Won: <input type="amountWon" name="amountWon"/><br/>
+    Amount Won: <input type="amountWon" name="amountWon" value="0"/><br/>
     <input type="submit" value="Add">
 </form>
 
-<table>
+<table class="table table-hover">
     <thead>
     <td>Place</td>
     <td colspan="2">Player</td>

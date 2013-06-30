@@ -26,7 +26,7 @@ class AllPlayersView(generic.ListView):
     context_object_name = 'players'
 
     def get_queryset(self):
-        return Player.objects.all()
+        return sorted(Player.objects.all(), key=lambda x: x.name)
 
 
 def PlayerInfoView(request, playerId):
@@ -37,13 +37,17 @@ def PlayerInfoView(request, playerId):
     totalProfit = totalWon - totalSpent
     numberOfGames = len(playerResults)
 
+    averageProfit = 0
+    if numberOfGames > 0:
+        averageProfit = totalProfit/numberOfGames
+
     model = {
         'player' : player,
         'results' : playerResults,
         'totalWon' : totalWon,
         'totalSpent' : totalSpent,
         'totalProfit' : totalProfit,
-        'averageProfit' : totalProfit/numberOfGames
+        'averageProfit' : averageProfit
     }
 
     return render(request, 'player-detail.html', model)
@@ -69,7 +73,7 @@ def createGame(request):
     game = Game(buyin=buyin, gameType=Game.NL_TEXAS_HOLDEM, datePlayed=date(now.year, now.month, now.day))
     game.save()
 
-    return redirect("/pokerroom/game/%d" % game.id)
+    return redirect("/pokerroom/result/%d/add-result" % game.id)
 
 
 def createPlayerForm(request):
@@ -120,7 +124,7 @@ def addResult(request, gameId):
     eliminatedPlayers = [result.player.id for result in currentResults]
 
     model = {
-        'players': players,
+        'players': sorted(players, key=lambda x: x.name),
         'currentResults': currentResults,
         'nextPlace': nextPlace,
         'game': game,

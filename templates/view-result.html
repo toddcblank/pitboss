@@ -1,12 +1,7 @@
-<html>
-<head>
-    <title>Result for {{ game }}</title>
-    {{ game }}<br/>
-</head>
-
+{% include "header.html" %}
 <body>
 
-<table>
+<table class="table  table-hover">
     <thead>
     <td>Place</td>
     <td colspan="2">Player</td>
@@ -17,9 +12,10 @@
             <td>{{ result.place }}</td>
             <td><a href="/pokerroom/player/{{ result.player.id }}"><img src="http://www.gravatar.com/avatar/{{ result.player.gravatarId }}"/></a></td>
             <td><a href="/pokerroom/player/{{ result.player.id }}">{{ result.player.name }}</a></td>
-            <td>{{ result.amountWon }}</td>
+            <td>${{ result.amountWon }}</td>
         </tr>
     {% endfor %}
 </table>
+    <a href="/pokerroom/result/{{ game.id }}/add-result">Add Result</a>
 </body>
 </html>
