@@ -6,6 +6,35 @@ from django.shortcuts import render, render_to_response, redirect
 from django.views import generic
 from datetime import date
 import datetime
+import operator
+
+def leaderboard(request):
+
+    players = Player.objects.all()
+    results = Result.objects.all()
+    pointsPerPosition = {
+        1:20, 
+        2:15,
+        3:12, 
+        4:10, 
+        5:8, 
+        6:6, 
+        7:4, 
+        8:2, 
+        9:1, 
+        10:0
+    }
+    leaderboards = {player: 0 for player in players}
+    for result in results:
+        leaderboards[result.player] += pointsPerPosition[result.place]
+
+    tuples = sorted(leaderboards.iteritems(), key=operator.itemgetter(1))
+    tuples.reverse()
+    model = {
+        "leaderboard" : tuples
+    }
+
+    return render(request, 'leaderboard.html', model)
 
 
 def allPlayers(request):
