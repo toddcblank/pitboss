@@ -1,0 +1,11 @@
+<div>
+    {% if loggedInPlayer %}
+        <div id="avatar"><img src="http://www.gravatar.com/avatar/{{ loggedInPlayer.gravatarId }}"/>
+            {{ loggedInPlayer }}
+        </div>
+    {%  else %}
+        <div>
+            <a href="/pokerroom/login">Login</a>
+        </div>
+    {% endif %}
+</div>

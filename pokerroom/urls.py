@@ -12,4 +12,5 @@ urlpatterns = patterns('',
     url(r'^game', views.allGames.as_view(), name="allGames"),
     url(r'^result/(?P<gameId>\d+)/add-result', views.addResult, name="addResultForm"),
     url(r'^leaderboard', views.leaderboard, name="leaderboards"),
+    url(r'^login', views.login, name="login"),
 )

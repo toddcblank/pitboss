@@ -1,30 +1,43 @@
 from django.db import models
+from django.contrib.auth.models import User
 import hashlib
 
 # Create your models here.
 class Player(models.Model):
-    name = models.CharField(max_length=64)
-    nickname = models.CharField(max_length=128)
-    email = models.CharField(max_length=1024)
 
+    nickname = models.CharField(max_length=128)
+    user = models.OneToOneField(User, blank=True)
+
+    @property
+    def username(self):
+        try:
+            if self.user:
+                return self.user.get_full_name()
+            else:
+                return self.nickname
+        except:
+            return self.nickname
 
     @property
     def gravatarId(self):
         #this is kind of wasteful to recalculate every request.  but meh.
         md = hashlib.md5()
-        md.update(self.email.strip().lower())
+        md.update(self.user.email.strip().lower())
         return md.hexdigest()
 
     def asDict(self):
         return {
             "id": self.id,
-            "name": self.name,
+            "name": self.name(),
             "nickname": self.nickname,
-            "email": self.email
+            "email": self.user.email
         }
 
     def __str__(self):
-        return self.name
+        if self.user.get_full_name():
+            return self.user.get_full_name()
+
+        return self.nickname
 
 
 class Game(models.Model):
