@@ -5,7 +5,14 @@
     </head>
 <body>
 <script src="http://code.jquery.com/jquery.js"></script>
+<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
 <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+<script>
+  $(function() {
+    $( "#datepicker" ).datepicker();
+  });
+  </script>
 <div id="links">
 <h2><a href="/pokerroom/game">Games</a> - <a href="/pokerroom/player">Players</a> - <a href="/pokerroom/leaderboard">Leaderboard</a></h2>
 </div>

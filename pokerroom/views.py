@@ -50,6 +50,14 @@ def login(request):
 
     return render(request, 'login.html')
 
+class playerPriorityList(generic.ListView):
+    template_name = 'all-players.html'
+    context_object_name = 'players'
+
+    def get_queryset(self):
+        
+        return Player.objects.all()
+
 def allPlayers(request):
     players = Player.objects.order_by('nickname')
 
@@ -68,7 +76,7 @@ class AllPlayersView(generic.ListView):
     context_object_name = 'players'
 
     def get_queryset(self):
-        return sorted(Player.objects.all(), key=lambda x: x.name)
+        return sorted(Player.objects.all(), key=lambda x: x.nickname)
 
 
 def PlayerInfoView(request, playerId):
@@ -94,6 +102,24 @@ def PlayerInfoView(request, playerId):
 
     return render(request, 'player-detail.html', model)
 
+def updatePlayerInterestInGame(request, playerId, gameId):
+
+    newState = int(request.POST['newState'])
+    player = Player.objects.get(id=playerId)
+    try:
+        existingResult = Result.objects.filter(gameId=gameId, player=player)
+        existingResult.state = newState
+        existingResult.save()
+    except:
+        game = Game.objects.filter(gameId=gameId)
+        result = Result(
+            game=game,
+            player=player,
+            state=newState
+        )
+        result.save()
+
+    pass
 
 def createPlayer(request):
     try:
@@ -111,8 +137,12 @@ def createPlayer(request):
 
 def createGame(request):
     buyin = float(request.POST['buyin'])
-    now = datetime.datetime.now()
-    game = Game(buyin=buyin, gameType=Game.NL_TEXAS_HOLDEM, datePlayed=date(now.year, now.month, now.day))
+    datePlayed = request.POST['datePlayed']
+    day = int(datePlayed.split('/')[1])
+    month = int(datePlayed.split('/')[0])
+    year = int(datePlayed.split('/')[2])
+
+    game = Game(buyin=buyin, gameType=Game.NL_TEXAS_HOLDEM, datePlayed=date(year, month, day))
     game.save()
 
     return redirect("/pokerroom/result/%d/add-result" % game.id)
@@ -120,7 +150,6 @@ def createGame(request):
 
 def createPlayerForm(request):
     return render(request, 'create-player-form.html')
-
 
 def createGameForm(request):
     return render(request, 'create-game-form.html')
@@ -166,7 +195,7 @@ def addResult(request, gameId):
     eliminatedPlayers = [result.player.id for result in currentResults]
 
     model = {
-        'players': sorted(players, key=lambda x: x.name),
+        'players': sorted(players, key=lambda x: x.nickname),
         'currentResults': currentResults,
         'nextPlace': nextPlace,
         'game': game,
@@ -174,5 +203,3 @@ def addResult(request, gameId):
     }
 
     return render(request, "add-result.html", model)
-
-    pass
