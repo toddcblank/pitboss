@@ -1,0 +1,45 @@
+{% include "header.html" %}
+<script type="text/javascript" src="/static/javascript/signup.js"></script>
+
+
+<body>
+<h1>Signup for {{ game }}</h1>
+<table>
+    <thead>
+        <td colspan="2">Interest List Sorted by Invite Priority</td>
+    </thead>
+    {% for interestedPlayer in interestedPlayers %}
+        <tr>
+            <td>{{ interestedPlayer.nickname }}</td>
+            <td>Remove signup</td>
+        </tr>
+    {% endfor %}
+</table>
+
+<table class="table table-hover">
+    <thead>
+    <td colspan="2">Player</td>
+    <td>Interested</td>
+    <td>Not Interested</td>
+    </thead>
+    {% for player in unsignedupPlayers %}
+        <tr>
+            <td><img src="http://www.gravatar.com/avatar/{{ player.gravatarId }}"/></td>
+            <td>{{ player.name }}</td>
+            <td><a href="javascript:signup({{ player.id }}, {{ game.id }});">Interest Link</td>
+            <td>Not Interest Link</td>
+
+            
+
+        </tr>
+    {% endfor %}
+</table>
+
+<form name="signup" id="signup" action="/pokerroom/game/{{ game.id }}/signup" method="POST">
+    {% csrf_token %}
+    <input type="hidden" id="signup-playerId" name="playerId" value="{{ player.id }}" />
+
+</form>
+
+</body>
+</html>

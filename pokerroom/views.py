@@ -58,6 +58,20 @@ class playerPriorityList(generic.ListView):
         
         return Player.objects.all()
 
+def gameSignup(request, gameId):
+    game = Game.objects.get(id=gameId)
+
+    interestedPlayers = Result.objects.filter(game=game)
+    unsignedupPlayers = Player.objects.all()
+
+    model = {
+        'game' : game,
+        'interestedPlayers' : interestedPlayers,
+        'unsignedupPlayers' : unsignedupPlayers,
+    }
+    
+    return render(request, 'signup.html', model)
+
 def allPlayers(request):
     players = Player.objects.order_by('nickname')
 
@@ -102,37 +116,61 @@ def PlayerInfoView(request, playerId):
 
     return render(request, 'player-detail.html', model)
 
-def updatePlayerInterestInGame(request, playerId, gameId):
+def signupPlayerForGame(request, gameId):
+    playerId = request.POST['playerId']
+    return updatePlayerInterestInGame(playerId, gameId, Result.INTERESTED)
+    
 
-    newState = int(request.POST['newState'])
+
+def unsignupPlayerForGame(request, gameId):
+    playerId = request.POST['playerId']
+    return updatePlayerInterestInGame(playerId, gameId, Result.NOT_INTERESTED)
+    
+
+
+def updatePlayerInterestInGame(playerId, gameId, newState):
+
     player = Player.objects.get(id=playerId)
-    try:
-        existingResult = Result.objects.filter(gameId=gameId, player=player)
+    game = Game.objects.get(id=gameId)
+    #try:
+    existingResults = Result.objects.filter(game=game, player=player)
+
+    if len(existingResults) >= 1:
+        existingResult = existingResults[0]
+        print 'Found existing result for player %d for gameId %d' % (player.id, game.id)
         existingResult.state = newState
         existingResult.save()
-    except:
-        game = Game.objects.filter(gameId=gameId)
+    else:
         result = Result(
             game=game,
             player=player,
             state=newState
         )
+        print 'Creating new result for game %d player %d state %d' % (game.id, player.id, newState)
         result.save()
 
-    pass
+    return HttpResponse(json.dumps({}), content_type="application/json")
+
+def interestListJson(request, gameId):
+
+    game = Game.objects.get(id=gameId)
+
+    interestList = Result.objects.filter(game=game)
+
+    return HttpResponse(json.dumps({
+        'interestList' : interestList
+        }), content_type="application/json")
 
 def createPlayer(request):
-    try:
-        name = request.POST['name']
+    #try:
         nickname = request.POST['nickname']
-        email = request.POST['email']
 
-        player = Player(name=name, nickname=nickname, email=email)
+        player = Player(nickname=nickname)
         player.save()
 
         return redirect("/pokerroom/player")
-    except:
-        raise Http404
+    #except:
+    #    raise Http404
 
 
 def createGame(request):

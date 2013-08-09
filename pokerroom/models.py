@@ -50,9 +50,7 @@ class Player(models.Model):
     def asDict(self):
         return {
             "id": self.id,
-            "name": self.name(),
-            "nickname": self.nickname,
-            "email": self.user.email
+            "nickname": self.nickname
         }
 
     def __str__(self):
@@ -97,7 +95,7 @@ class Result(models.Model):
     NOT_INTERESTED = -1
 
     RESULT_STATE = [
-        (FINISHED, "Finished")
+        (FINISHED, "Finished"),
         (PLAYING, "Playing"),
         (INTERESTED, "Interested"),
         (NOT_SPECIFIED, "Not Specified"),
