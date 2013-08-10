@@ -106,7 +106,7 @@ class Result(models.Model):
     player = models.ForeignKey(Player)
     seat = models.IntegerField(blank=True, null=True)
     place = models.IntegerField(blank=True, null=True)
-    amountWon = models.FloatField(blank=True, null=True)
+    amountWon = models.FloatField(default=0)
     state = models.IntegerField(default=NOT_SPECIFIED, choices=RESULT_STATE)
 
     def asDict(self):
@@ -117,7 +117,7 @@ class Result(models.Model):
             "place": self.place,
             "amount": self.amountWon,
             "seat": self.seat,
-            "state": self.state,
+            "state": self.get_state_display(),
         }
 
     @property

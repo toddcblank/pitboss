@@ -118,12 +118,14 @@ def PlayerInfoView(request, playerId):
 
 def signupPlayerForGame(request, gameId):
     playerId = request.POST['playerId']
+    print 'Adding interest for player %s in game %s' % (playerId, gameId)
     return updatePlayerInterestInGame(playerId, gameId, Result.INTERESTED)
     
 
 
 def unsignupPlayerForGame(request, gameId):
     playerId = request.POST['playerId']
+    print 'Removing interest for player %s in game %s' % (playerId, gameId)
     return updatePlayerInterestInGame(playerId, gameId, Result.NOT_INTERESTED)
     
 
@@ -158,22 +160,22 @@ def interestListJson(request, gameId):
     interestList = Result.objects.filter(game=game)
 
     return HttpResponse(json.dumps({
-        'interestList' : interestList
+        'interestList' : [i.asDict() for i in interestList]
         }), content_type="application/json")
 
+
 def createPlayer(request):
-    #try:
-        nickname = request.POST['nickname']
 
-        player = Player(nickname=nickname)
-        player.save()
+    nickname = request.POST['nickname']
 
-        return redirect("/pokerroom/player")
-    #except:
-    #    raise Http404
+    player = Player(nickname=nickname)
+    player.save()
+
+    return redirect("/pokerroom/player")
 
 
 def createGame(request):
+
     buyin = float(request.POST['buyin'])
     datePlayed = request.POST['datePlayed']
     day = int(datePlayed.split('/')[1])
@@ -183,7 +185,7 @@ def createGame(request):
     game = Game(buyin=buyin, gameType=Game.NL_TEXAS_HOLDEM, datePlayed=date(year, month, day))
     game.save()
 
-    return redirect("/pokerroom/result/%d/add-result" % game.id)
+    return redirect("/pokerroom/game/%d/signups" % game.id)
 
 
 def createPlayerForm(request):

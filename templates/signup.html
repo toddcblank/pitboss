@@ -26,8 +26,8 @@
         <tr>
             <td><img src="http://www.gravatar.com/avatar/{{ player.gravatarId }}"/></td>
             <td>{{ player.name }}</td>
-            <td><a href="javascript:signup({{ player.id }}, {{ game.id }});">Interest Link</td>
-            <td>Not Interest Link</td>
+            <td><a href="javascript:signup({{ player.id }}, {{ game.id }});">Interest Link</a></td>
+            <td><a href="javascript:unsignup({{ player.id }}, {{ game.id }});">Not Interest Link</a></td>
 
             
 
@@ -38,6 +38,12 @@
 <form name="signup" id="signup" action="/pokerroom/game/{{ game.id }}/signup" method="POST">
     {% csrf_token %}
     <input type="hidden" id="signup-playerId" name="playerId" value="{{ player.id }}" />
+
+</form>
+
+<form name="signup" id="unsignup" action="/pokerroom/game/{{ game.id }}/unsignup" method="POST">
+    {% csrf_token %}
+    <input type="hidden" id="unsignup-playerId" name="playerId" value="{{ player.id }}" />
 
 </form>
 
