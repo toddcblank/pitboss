@@ -4,14 +4,27 @@
 
 <body>
 <h1>Signup for {{ game }}</h1>
-<table>
+<table class="table table-hover">
     <thead>
-        <td colspan="2">Interest List Sorted by Invite Priority</td>
+        <td colspan="3">Interest List Sorted by Invite Priority</td>
     </thead>
     {% for interestedPlayer in interestedPlayers %}
         <tr>
-            <td>{{ interestedPlayer.nickname }}</td>
-            <td>Remove signup</td>
+            <td>{{ interestedPlayer.player.priorityIndex }}
+            <td>{{ interestedPlayer }}</td>
+            <td><a href="javascript:unsignup({{ interestedPlayer.id }}, {{ game.id }});">Remove signup</a></td>
+        </tr>
+    {% endfor %}
+</table>
+
+<table class="table table-hover">
+    <thead>
+        <td colspan="2">UnInterest List</td>
+    </thead>
+    {% for uninterestedPlayer in uninterestedPlayers %}
+        <tr>
+            <td>{{ uninterestedPlayer }}</td>
+            <td><a href="javascript:signup({{ uninterestedPlayer.id }}, {{ game.id }});">Signup</a></td>
         </tr>
     {% endfor %}
 </table>
@@ -25,7 +38,7 @@
     {% for player in unsignedupPlayers %}
         <tr>
             <td><img src="http://www.gravatar.com/avatar/{{ player.gravatarId }}"/></td>
-            <td>{{ player.name }}</td>
+            <td>{{ player }}</td>
             <td><a href="javascript:signup({{ player.id }}, {{ game.id }});">Interest Link</a></td>
             <td><a href="javascript:unsignup({{ player.id }}, {{ game.id }});">Not Interest Link</a></td>
 

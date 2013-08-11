@@ -43,9 +43,17 @@ class Player(models.Model):
 
     @property
     def priorityIndex(self):
-        lastResult = Result.objects.filter(player=self).order_by('datePlayed')[0]
+        lastResults = Result.objects.filter(player=self, state=Result.FINISHED).order_by('game')
 
-        return str(self.priority).zfill(3) + str(lastResult.game.datePlayed) + str(lastResult.place).zfill(3)
+        datePart = '99999999'
+        placePart = '999'
+
+        if len(lastResults) > 0:
+            lastResult = lastResults[0]
+            datePart = str(lastResult.game.datePlayed.year) + str(lastResult.game.datePlayed.month).zfill(2) + str(lastResult.game.datePlayed.day).zfill(2)
+            placePart = str(lastResult.place).zfill(2)
+
+        return str(self.priority).zfill(3) + datePart + placePart
 
     def asDict(self):
         return {

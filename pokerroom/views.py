@@ -61,13 +61,15 @@ class playerPriorityList(generic.ListView):
 def gameSignup(request, gameId):
     game = Game.objects.get(id=gameId)
 
-    interestedPlayers = Result.objects.filter(game=game)
+    interestedPlayers = Result.objects.filter(game=game, state=Result.INTERESTED)
+    uninterestedPlayers = Result.objects.filter(game=game, state=Result.NOT_INTERESTED)
     unsignedupPlayers = Player.objects.all()
 
     model = {
         'game' : game,
-        'interestedPlayers' : interestedPlayers,
+        'interestedPlayers' : sorted(interestedPlayers, key=lambda result: result.player.priorityIndex, reverse=True),
         'unsignedupPlayers' : unsignedupPlayers,
+        'uninterestedPlayers' : uninterestedPlayers,
     }
     
     return render(request, 'signup.html', model)
