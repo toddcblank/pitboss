@@ -13,8 +13,11 @@ urlpatterns = patterns('',
     url(r'^game/(?P<gameId>\d+)/approve/?$', views.approvePlayerForGame, name="approvePlayerForGame"),
     url(r'^game/(?P<gameId>\d+)/signup-newplayer/?$', views.createPlayerAndSignupForGame, name="createPlayerAndSignupForGame"),
     url(r'^game/(?P<gameId>\d+)/unsignup/?$', views.unsignupPlayerForGame, name="unsignupPlayerForGame"),
+    url(r'^game/(?P<gameId>\d+)/start-game?$', views.startGame, name="startGame"),
+    url(r'^game/(?P<gameId>\d+)/view-game-in-progress?$', views.viewGameInProgress, name="viewGameInProgress"),
     url(r'^game/(?P<gameId>\d+)/?$', views.viewResult, name="gameResult"),
-    
+
+
 
     url(r'^game/create-form/?$', views.createGameForm, name="createGameForm"),
     url(r'^game/create/?$', views.createGame, name="createGame"),

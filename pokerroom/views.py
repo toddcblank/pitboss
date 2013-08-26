@@ -1,5 +1,6 @@
 # Create your views here.
 import json
+import random
 from django.http import Http404, HttpResponse, HttpResponseServerError
 from pokerroom.models import Player, Game, Result
 from django.shortcuts import render, render_to_response, redirect
@@ -9,21 +10,21 @@ from django.db.models import Q
 import operator
 from django.contrib.auth import authenticate
 
-def leaderboard(request):
 
+def leaderboard(request):
     players = Player.objects.all()
     results = Result.objects.all()
     pointsPerPosition = {
-        1:20, 
-        2:15,
-        3:12, 
-        4:10, 
-        5:8, 
-        6:6, 
-        7:4, 
-        8:2, 
-        9:1, 
-        10:0
+        1: 20,
+        2: 15,
+        3: 12,
+        4: 10,
+        5: 8,
+        6: 6,
+        7: 4,
+        8: 2,
+        9: 1,
+        10: 0
     }
     leaderboards = {player: 0 for player in players}
     for result in results:
@@ -32,13 +33,13 @@ def leaderboard(request):
     tuples = sorted(leaderboards.iteritems(), key=operator.itemgetter(1))
     tuples.reverse()
     model = {
-        "leaderboard" : tuples
+        "leaderboard": tuples
     }
 
     return render(request, 'leaderboard.html', model)
 
-def login(request):
 
+def login(request):
     if request.method == "POST":
         name = request.POST['username']
         password = request.POST['password']
@@ -50,17 +51,17 @@ def login(request):
 
     return render(request, 'login.html')
 
+
 class playerPriorityList(generic.ListView):
     template_name = 'all-players.html'
     context_object_name = 'players'
 
     def get_queryset(self):
-        
         return Player.objects.all()
+
 
 def gameSignup(request, gameId):
     game = Game.objects.get(id=gameId)
-
 
     interestList = Result.objects.filter(game=game)
     sortedInterestList = sorted(
@@ -75,20 +76,22 @@ def gameSignup(request, gameId):
     unsignedupPlayers = Player.objects.all()
 
     model = {
-        'game' : game,
-        'sortedInterestList' : sortedInterestList,
-        'approvedPlayers' : approvedPlayers,
-        'interestedPlayers' : sorted(interestedPlayers, key=lambda result: result.player.priorityIndex, reverse=True),
-        'unsignedupPlayers' : unsignedupPlayers,
-        'uninterestedPlayers' : uninterestedPlayers,
+        'game': game,
+        'sortedInterestList': sortedInterestList,
+        'approvedPlayers': approvedPlayers,
+        'interestedPlayers': sorted(interestedPlayers, key=lambda result: result.player.priorityIndex, reverse=True),
+        'unsignedupPlayers': unsignedupPlayers,
+        'uninterestedPlayers': uninterestedPlayers,
     }
-    
+
     return render(request, 'signup.html', model)
+
 
 def allPlayers(request):
     players = Player.objects.order_by('nickname')
 
     return HttpResponse(json.dumps([player.asDict() for player in players]), content_type="application/json")
+
 
 class allGames(generic.ListView):
     template_name = 'all-games.html'
@@ -116,15 +119,15 @@ def PlayerInfoView(request, playerId):
 
     averageProfit = 0
     if numberOfGames > 0:
-        averageProfit = totalProfit/numberOfGames
+        averageProfit = totalProfit / numberOfGames
 
     model = {
-        'player' : player,
-        'results' : playerResults,
-        'totalWon' : totalWon,
-        'totalSpent' : totalSpent,
-        'totalProfit' : totalProfit,
-        'averageProfit' : averageProfit
+        'player': player,
+        'results': playerResults,
+        'totalWon': totalWon,
+        'totalSpent': totalSpent,
+        'totalProfit': totalProfit,
+        'averageProfit': averageProfit
     }
 
     return render(request, 'player-detail.html', model)
@@ -133,7 +136,8 @@ def signupPlayerForGame(request, gameId):
     playerId = request.POST['playerId']
     print 'Adding interest for player %s in game %s' % (playerId, gameId)
     return updatePlayerInterestInGame(playerId, gameId, Result.INTERESTED)
-    
+
+
 def approvePlayerForGame(request, gameId):
     playerId = request.POST['playerId']
     print 'Adding interest for player %s in game %s' % (playerId, gameId)
@@ -144,11 +148,9 @@ def unsignupPlayerForGame(request, gameId):
     playerId = request.POST['playerId']
     print 'Removing interest for player %s in game %s' % (playerId, gameId)
     return updatePlayerInterestInGame(playerId, gameId, Result.NOT_INTERESTED)
-    
 
 
 def updatePlayerInterestInGame(playerId, gameId, newState):
-
     player = Player.objects.get(id=playerId)
     game = Game.objects.get(id=gameId)
     #try:
@@ -170,19 +172,20 @@ def updatePlayerInterestInGame(playerId, gameId, newState):
 
     return HttpResponse(json.dumps({}), content_type="application/json")
 
-def interestListJson(request, gameId):
 
+def interestListJson(request, gameId):
     game = Game.objects.get(id=gameId)
 
     interestList = Result.objects.filter(game=game)
-    sortedInterestList = sorted(interestList, key=lambda result: (result.state, result.player.priorityIndex), reverse=True)
+    sortedInterestList = sorted(interestList, key=lambda result: (result.state, result.player.priorityIndex),
+                                reverse=True)
 
     return HttpResponse(json.dumps({
-        'interestList' : [i.asDict() for i in sortedInterestList]
-        }), content_type="application/json")
+        'interestList': [i.asDict() for i in sortedInterestList]
+    }), content_type="application/json")
+
 
 def createPlayerAndSignupForGame(request, gameId):
-
     nickname = request.POST['nickname']
     existingUser = Player.objects.filter(nickname=nickname)
     game = Game.objects.get(id=gameId)
@@ -211,11 +214,10 @@ def createPlayerAndSignupForGame(request, gameId):
 
     result.save()
 
-    return HttpResponse(json.dumps({"success":True}), content_type="application/json")
+    return HttpResponse(json.dumps({"success": True}), content_type="application/json")
 
 
 def createPlayer(request):
-
     nickname = request.POST['nickname']
 
     player = Player(nickname=nickname)
@@ -225,7 +227,6 @@ def createPlayer(request):
 
 
 def createGame(request):
-
     buyin = float(request.POST['buyin'])
     datePlayed = request.POST['datePlayed']
     day = int(datePlayed.split('/')[1])
@@ -247,8 +248,10 @@ def createGame(request):
 def createPlayerForm(request):
     return render(request, 'create-player-form.html')
 
+
 def createGameForm(request):
     return render(request, 'create-game-form.html')
+
 
 def viewResult(request, gameId):
     game = Game.objects.filter(id=gameId)[0]
@@ -261,7 +264,72 @@ def viewResult(request, gameId):
 
     return render(request, "view-result.html", model)
 
-    pass
+def viewGameInProgress(request, gameId):
+    game = Game.objects.get(id=gameId)
+    results = Result.objects.filter(game=game, state=Result.PLAYING)
+    model = {
+        "game" : game,
+        "playerList" : sorted(results, key=lambda x: x.seat)
+    }
+    return render(request, "view-game-in-progress.html", model)
+
+"""
+   Starts game with the current players that are approved.  should prevent further approving/signup
+
+   Will assign seats to everyone in the following order:
+       1. if Todd is playing he gets seat 1.
+       2. first found non-Todd facilitator gets seat 1
+       3. Randomize the rest
+"""
+def startGame(request, gameId):
+    game = Game.objects.get(id=gameId)
+
+    results = Result.objects.filter(game=game, state=Result.PLAYING)
+
+    dealerFound = False
+
+    for result in results:
+        if result.player.nickname == "Todd Blank":
+            result.seat = 1
+            result.save()
+            dealerFound = True
+            break
+
+    seatList = range(2, len(results) + 1)
+    random.shuffle(seatList)
+    seatIndex = 0
+    print "seatIndexs:"
+    print seatList
+
+    for result in results:
+        if result.player.nickname == "Todd Blank":
+            pass
+        elif result.player.priority == result.player.FACILITATOR and not dealerFound:
+            result.seat = 1
+            result.save()
+            dealerFound = True
+        else:
+            print "placing %s in seatIndex %d " % (result.player, seatIndex)
+            result.seat = seatList[seatIndex]
+            result.save()
+            seatIndex += 1
+
+    return redirect("/pokerroom/game/%d/view-game-in-progress" % game.id)
+
+
+# Unseats everyone, essentially unstarting the game.
+def unstartGame(request, gameId):
+    game = Game.objects.get(id=gameId)
+
+    results = Result.objects.filter(game=game, state=Result.PLAYING)
+    for result in results:
+        result.seat = None
+        result.save()
+
+    model = {
+        "playerList" : results
+    }
+    return render(request, "view-game-in-progress.html", model)
 
 def addResult(request, gameId):
     game = Game.objects.filter(id=gameId)[0]
