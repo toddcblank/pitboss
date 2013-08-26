@@ -5,7 +5,7 @@ from pokerroom.models import Player, Game, Result
 from django.shortcuts import render, render_to_response, redirect
 from django.views import generic
 from datetime import date
-import datetime
+from django.db.models import Q
 import operator
 from django.contrib.auth import authenticate
 
@@ -61,12 +61,23 @@ class playerPriorityList(generic.ListView):
 def gameSignup(request, gameId):
     game = Game.objects.get(id=gameId)
 
+
+    interestList = Result.objects.filter(game=game)
+    sortedInterestList = sorted(
+        interestList,
+        key=lambda result: (result.state, result.player.priorityIndex),
+        reverse=True
+    )
+
+    approvedPlayers = Result.objects.filter(game=game, state=Result.PLAYING)
     interestedPlayers = Result.objects.filter(game=game, state=Result.INTERESTED)
     uninterestedPlayers = Result.objects.filter(game=game, state=Result.NOT_INTERESTED)
     unsignedupPlayers = Player.objects.all()
 
     model = {
         'game' : game,
+        'sortedInterestList' : sortedInterestList,
+        'approvedPlayers' : approvedPlayers,
         'interestedPlayers' : sorted(interestedPlayers, key=lambda result: result.player.priorityIndex, reverse=True),
         'unsignedupPlayers' : unsignedupPlayers,
         'uninterestedPlayers' : uninterestedPlayers,
@@ -123,6 +134,10 @@ def signupPlayerForGame(request, gameId):
     print 'Adding interest for player %s in game %s' % (playerId, gameId)
     return updatePlayerInterestInGame(playerId, gameId, Result.INTERESTED)
     
+def approvePlayerForGame(request, gameId):
+    playerId = request.POST['playerId']
+    print 'Adding interest for player %s in game %s' % (playerId, gameId)
+    return updatePlayerInterestInGame(playerId, gameId, Result.PLAYING)
 
 
 def unsignupPlayerForGame(request, gameId):
@@ -160,10 +175,43 @@ def interestListJson(request, gameId):
     game = Game.objects.get(id=gameId)
 
     interestList = Result.objects.filter(game=game)
+    sortedInterestList = sorted(interestList, key=lambda result: (result.state, result.player.priorityIndex), reverse=True)
 
     return HttpResponse(json.dumps({
-        'interestList' : [i.asDict() for i in interestList]
+        'interestList' : [i.asDict() for i in sortedInterestList]
         }), content_type="application/json")
+
+def createPlayerAndSignupForGame(request, gameId):
+
+    nickname = request.POST['nickname']
+    existingUser = Player.objects.filter(nickname=nickname)
+    game = Game.objects.get(id=gameId)
+
+    player = None
+    if len(existingUser) == 0:
+        print "Found no users with nickname %s " % nickname
+        player = Player(nickname=nickname)
+        player.save()
+
+    else:
+        print "Found existing user with nickname %s " % nickname
+        player = existingUser[0]
+
+    existingSignup = Result.objects.filter(game=game, player=player)
+    result = None
+    if len(existingSignup) == 0:
+        result = Result(
+            game=game,
+            player=player,
+            state=Result.INTERESTED
+        )
+    else:
+        result = existingSignup[0]
+        result.state = Result.INTERESTED
+
+    result.save()
+
+    return HttpResponse(json.dumps({"success":True}), content_type="application/json")
 
 
 def createPlayer(request):
@@ -187,7 +235,13 @@ def createGame(request):
     game = Game(buyin=buyin, gameType=Game.NL_TEXAS_HOLDEM, datePlayed=date(year, month, day))
     game.save()
 
-    return redirect("/pokerroom/game/%d/signups" % game.id)
+    playerList = Player.objects.all()
+    for player in playerList:
+        result = Result(
+            game=game,
+            player=player)
+        result.save()
+    return redirect("/pokerroom/game/%d/signup-form" % game.id)
 
 
 def createPlayerForm(request):

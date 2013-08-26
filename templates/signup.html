@@ -1,64 +1,70 @@
 {% include "header.html" %}
-<script type="text/javascript" src="/static/javascript/signup.js"></script>
+<script type="text/javascript" src="/static/javascript/signup.js">
+     $("#create-and-signup").keydown(function (e) { if(e.which == 13) e.preventDefault(); });
+
+</script>
 
 
 <body>
 <h1>Signup for {{ game }}</h1>
-<table class="table table-hover">
-    <thead>
-        <td colspan="3">Interest List Sorted by Invite Priority</td>
-    </thead>
-    {% for interestedPlayer in interestedPlayers %}
-        <tr>
-            <td>{{ interestedPlayer.player.priorityIndex }}
-            <td>{{ interestedPlayer }}</td>
-            <td><a href="javascript:unsignup({{ interestedPlayer.id }}, {{ game.id }});">Remove signup</a></td>
-        </tr>
-    {% endfor %}
-</table>
 
-<table class="table table-hover">
+<div id="interestTableDiv">
+<table class="table table-hover" id="interestTable">
     <thead>
-        <td colspan="2">UnInterest List</td>
+        <td colspan="4" style="text-align: center">Interest List</td>
     </thead>
-    {% for uninterestedPlayer in uninterestedPlayers %}
+    <tbody>
+    {% for entry in sortedInterestList %}
         <tr>
-            <td>{{ uninterestedPlayer }}</td>
-            <td><a href="javascript:signup({{ uninterestedPlayer.id }}, {{ game.id }});">Signup</a></td>
-        </tr>
-    {% endfor %}
-</table>
-
-<table class="table table-hover">
-    <thead>
-    <td colspan="2">Player</td>
-    <td>Interested</td>
-    <td>Not Interested</td>
-    </thead>
-    {% for player in unsignedupPlayers %}
-        <tr>
-            <td><img src="http://www.gravatar.com/avatar/{{ player.gravatarId }}"/></td>
-            <td>{{ player }}</td>
-            <td><a href="javascript:signup({{ player.id }}, {{ game.id }});">Interest Link</a></td>
-            <td><a href="javascript:unsignup({{ player.id }}, {{ game.id }});">Not Interest Link</a></td>
-
-            
+{#            <td><img src="http://www.gravatar.com/avatar/{{ player.gravatarId }}" style="height: 32px"/></td>#}
+            <td>{{ entry.player.nickname }} </td>
+            {% if entry.state == 2 %}
+                <td>Approved</td>
+                <td><a href="javascript:unsignup({{ entry.player.id }})">Cancel</a></td>
+                <td/>
+            {% elif entry.state == 1 %}
+                <td>Signed Up</td>
+                <td><a href="javascript:unsignup({{ entry.player.id }})">Cancel</a></td>
+                <td><a href="javascript:approve({{ entry.player.id }})">Approve</a></td>
+            {% else %}
+                <td>Not Signed Up</td>
+                <td><a href="javascript:signup({{ entry.player.id }})">Signup</a></td>
+                <td/>
+            {% endif %}
 
         </tr>
     {% endfor %}
+    </tbody>
 </table>
+</div>
+<div id="create-and-signup-div">
+    <form name="signup" id="create-and-signup" action="/pokerroom/game/{{ game.id }}/signup-newplayer" method="POST">
+        {% csrf_token %}
+        <input type="text" id="create-and-signup-nickname" name="nickname"
+               value="New User"/>
+        <a href="javascript:createPlayerAndSignup()">Signup new Users</a>
+    </form>
+</div>
 
-<form name="signup" id="signup" action="/pokerroom/game/{{ game.id }}/signup" method="POST">
+<form name="signup" id="signup" action="/pokerroom/game/{{ game.id }}/signup" method="POST" onKeyPress="javascript:;">
     {% csrf_token %}
-    <input type="hidden" id="signup-playerId" name="playerId" value="{{ player.id }}" />
+    <input type="hidden" id="signup-playerId" name="playerId" value="{{ player.id }}"/>
 
 </form>
 
-<form name="signup" id="unsignup" action="/pokerroom/game/{{ game.id }}/unsignup" method="POST">
+<form name="signup" id="unsignup" action="/pokerroom/game/{{ game.id }}/unsignup" method="POST" onKeyPress="javascript:;">
     {% csrf_token %}
-    <input type="hidden" id="unsignup-playerId" name="playerId" value="{{ player.id }}" />
+    <input type="hidden" id="unsignup-playerId" name="playerId" value="{{ player.id }}"/>
 
 </form>
 
+
+<form name="approve" id="approve" action="/pokerroom/game/{{ game.id }}/approve" method="POST" onKeyPress="javascript:;">
+    {% csrf_token %}
+    <input type="hidden" id="approve-playerId" name="playerId" value="{{ player.id }}"/>
+
+</form>
+
+<input type="hidden" id="gameId" value="{{ game.id }}" />
 </body>
 </html>

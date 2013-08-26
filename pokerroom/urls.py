@@ -10,6 +10,8 @@ urlpatterns = patterns('',
     url(r'^game/(?P<gameId>\d+)/signup-form/?$', views.gameSignup, name="gameSignup"),
     url(r'^game/(?P<gameId>\d+)/signups/?$', views.interestListJson, name="interestListJson"),
     url(r'^game/(?P<gameId>\d+)/signup/?$', views.signupPlayerForGame, name="signupPlayerForGame"),
+    url(r'^game/(?P<gameId>\d+)/approve/?$', views.approvePlayerForGame, name="approvePlayerForGame"),
+    url(r'^game/(?P<gameId>\d+)/signup-newplayer/?$', views.createPlayerAndSignupForGame, name="createPlayerAndSignupForGame"),
     url(r'^game/(?P<gameId>\d+)/unsignup/?$', views.unsignupPlayerForGame, name="unsignupPlayerForGame"),
     url(r'^game/(?P<gameId>\d+)/?$', views.viewResult, name="gameResult"),
     

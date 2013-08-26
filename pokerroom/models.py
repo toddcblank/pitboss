@@ -58,7 +58,8 @@ class Player(models.Model):
     def asDict(self):
         return {
             "id": self.id,
-            "nickname": self.nickname
+            "nickname": self.nickname,
+            "priorityIndex": self.priorityIndex
         }
 
     def __str__(self):
