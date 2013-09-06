@@ -9,7 +9,7 @@ from datetime import date
 from django.db.models import Q
 import operator
 from django.contrib.auth import authenticate
-
+import payouts 
 
 def leaderboard(request):
     players = Player.objects.all()
@@ -254,7 +254,7 @@ def createGameForm(request):
 
 
 def viewResult(request, gameId):
-    game = Game.objects.filter(id=gameId)[0]
+    game = Game.objects.get(id=gameId)
     currentResults = Result.objects.filter(game=game).order_by('place')
 
     model = {
@@ -272,7 +272,6 @@ def viewGameInProgress(request, gameId):
         "playerList" : sorted(results, key=lambda x: x.seat)
     }
     return render(request, "view-game-in-progress.html", model)
-
 """
    Starts game with the current players that are approved.  should prevent further approving/signup
 
@@ -331,23 +330,37 @@ def unstartGame(request, gameId):
     }
     return render(request, "view-game-in-progress.html", model)
 
+def elminatePlayer(request, gameId):
+	game = Game.objects.get(id=gameId)
+	
+	playerId = request.POST['playerId']
+	player = Player.objects.get(id=playerId)
+
+	result = Result.objects.filter(game=game, player=player)[0]
+
+	previousResults = Result.objects.filter(game=game, state=Result.PLAYING).order_by('place')
+	
+
+	result.place = len(previousResults)
+	result.amountWon = payouts.getPrizeForPlace(9, result.place, game.buyin)
+	result.save()
+
+	
+    return HttpResponse(json.dumps({"success": True}), content_type="application/json")
+
 def addResult(request, gameId):
-    game = Game.objects.filter(id=gameId)[0]
+    game = Game.objects.get(id=gameId)
 
     if "playerId" in request.POST:
         playerId = request.POST['playerId']
         player = Player.objects.filter(id=playerId)[0]
-        seat = request.POST['seat']
         place = request.POST['place']
         amountWon = request.POST['amountWon']
 
-        result = Result(
-            game=game,
-            player=player,
-            seat=seat,
-            place=place,
-            amountWon=amountWon
-        )
+	result = Result.objects.filter(game=game, player=player)[0]
+
+        result.place = place
+	result.amountWon = amountWon
         result.save()
 
     players = Player.objects.all()
