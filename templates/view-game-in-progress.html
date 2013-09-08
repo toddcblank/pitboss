@@ -26,7 +26,7 @@
             <td>{{ entry.player.nickname }} </td>
             <td>
                 {% if entry.place > 0 %}
-                    Eliminated {{ entry.placeAsOrdinal }}
+                    Eliminated {{ entry.placeAsOrdinal }} (<a href="javascript:undoElimination({{ entry.player.id }});">Undo</a>)
                 {% else %}
                     <a href="javascript:eliminatePlayer({{ entry.player.id }})">Eliminate Player</a></td>
                 {% endif %}
@@ -44,6 +44,11 @@
     {% csrf_token %}
     <input type="hidden" id="eliminate-player-playerId" name="playerId" value="-1"/>
 </form>
+<form name="undo-eliminate-player" id="undo-eliminate-player" action="/pokerroom/game/{{ game.id }}/undo-eliminate-player" method="POST" onKeyPress="javascript:;">
+    {% csrf_token %}
+    <input type="hidden" id="undo-eliminate-player-playerId" name="playerId" value="-1"/>
+</form>
+
 <input type="hidden" id="gameId" value="{{ game.id }}" />
 </body>
 </html>
