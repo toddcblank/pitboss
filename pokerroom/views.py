@@ -99,7 +99,7 @@ class AllPlayersView(generic.ListView):
 
 def PlayerInfoView(request, playerId):
     player = Player.objects.get(id=playerId)
-    playerResults = Result.objects.filter(player=player)
+    playerResults = Result.objects.filter(player=player, state=Result.FINISHED)
     totalWon = sum(result.amountWon for result in playerResults)
     totalSpent = sum(result.game.buyin for result in playerResults)
     totalProfit = totalWon - totalSpent
