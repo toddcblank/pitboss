@@ -1,3 +1,4 @@
 *.sqllitedb
 *.idea
 *.pyc
+*.sqlitedb
