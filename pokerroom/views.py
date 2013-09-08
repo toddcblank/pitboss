@@ -357,6 +357,23 @@ def elminatePlayer(request, gameId):
 
     return redirect("/pokerroom/game/%d/view-game-in-progress" % game.id)
 
+def undoElminatePlayer(request, gameId):
+    game = Game.objects.get(id=gameId)
+
+    playerId = request.POST['playerId']
+    player = Player.objects.get(id=playerId)
+
+    result = Result.objects.filter(game=game, player=player)[0]
+
+    result.place = None
+    result.amountWon = 0
+
+    result.state = Result.PLAYING
+    result.save()
+    print "un-Eliminating %s" % (player.nickname)
+
+    return redirect("/pokerroom/game/%d/view-game-in-progress" % game.id)
+
 def addResult(request, gameId):
     game = Game.objects.get(id=gameId)
 
