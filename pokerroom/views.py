@@ -28,7 +28,7 @@ def leaderboard(request):
     }
     leaderboards = {player: 0 for player in players}
     for result in results:
-        leaderboards[result.player] += pointsPerPosition[result.place]
+        leaderboards[result.player] += result.profit
 
     tuples = sorted(leaderboards.iteritems(), key=operator.itemgetter(1))
     tuples.reverse()
