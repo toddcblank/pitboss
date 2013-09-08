@@ -13,19 +13,7 @@ import payouts
 
 def leaderboard(request):
     players = Player.objects.all()
-    results = Result.objects.all()
-    pointsPerPosition = {
-        1: 20,
-        2: 15,
-        3: 12,
-        4: 10,
-        5: 8,
-        6: 6,
-        7: 4,
-        8: 2,
-        9: 1,
-        10: 0
-    }
+    results = Result.objects.filter(state=Result.FINISHED)
     leaderboards = {player: 0 for player in players}
     for result in results:
         leaderboards[result.player] += result.profit
