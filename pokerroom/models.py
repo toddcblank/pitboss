@@ -136,7 +136,7 @@ class Result(models.Model):
     def profit(self):
         if self.amountWon:
             return self.amountWon - self.game.buyin
-        return 0
+        return 0 - self.game.buyin
 
     @property
     def placeAsOrdinal(self):

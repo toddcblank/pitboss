@@ -3,6 +3,8 @@
 Leaderboard: <br />
 <ol>
 {% for player, points in leaderboard %}
+    {% if points > 0 %}
   	<li> {{ player }} - {{ points }} </li>
+    {% endif %}
 {% endfor %}	
 </ol>
