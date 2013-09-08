@@ -118,6 +118,9 @@ class Result(models.Model):
     amountWon = models.FloatField(default=0)
     state = models.IntegerField(default=NOT_SPECIFIED, choices=RESULT_STATE)
 
+    suffixes = ["th", "st", "nd", "rd", ] + ["th"] * 16
+
+
     def asDict(self):
         return {
             "id": self.id,
@@ -134,6 +137,13 @@ class Result(models.Model):
         if self.amountWon:
             return self.amountWon - self.game.buyin
         return 0
+
+    @property
+    def placeAsOrdinal(self):
+        if self.place > 0:
+            return str(self.place) + self.suffixes[self.place % 100]
+        else:
+            return ""
 
     def __str__(self):
         if self.amountWon:

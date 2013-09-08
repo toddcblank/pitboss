@@ -266,10 +266,13 @@ def viewResult(request, gameId):
 
 def viewGameInProgress(request, gameId):
     game = Game.objects.get(id=gameId)
-    results = Result.objects.filter(game=game, state=Result.PLAYING)
+
+    results = Result.objects.filter(Q(game=game, state=Result.PLAYING) | Q(game=game, state=Result.FINISHED))
+
     model = {
-        "game" : game,
-        "playerList" : sorted(results, key=lambda x: x.seat)
+        "game": game,
+        "playerList": sorted(results, key=lambda x: x.seat),
+        "payouts": [payout * game.buyin for payout in payouts.PAYOUTS[len(results)]]
     }
     return render(request, "view-game-in-progress.html", model)
 """
@@ -328,25 +331,31 @@ def unstartGame(request, gameId):
     model = {
         "playerList" : results
     }
-    return render(request, "view-game-in-progress.html", model)
+    return redirect("/pokerroom/game/%d/signup-form" % game.id)
 
 def elminatePlayer(request, gameId):
-	game = Game.objects.get(id=gameId)
-	
-	playerId = request.POST['playerId']
-	player = Player.objects.get(id=playerId)
+    game = Game.objects.get(id=gameId)
 
-	result = Result.objects.filter(game=game, player=player)[0]
+    playerId = request.POST['playerId']
+    player = Player.objects.get(id=playerId)
 
-	previousResults = Result.objects.filter(game=game, state=Result.PLAYING).order_by('place')
-	
+    result = Result.objects.filter(game=game, player=player)[0]
 
-	result.place = len(previousResults)
-	result.amountWon = payouts.getPrizeForPlace(9, result.place, game.buyin)
-	result.save()
+    playersStillActive = Result.objects.filter(game=game, state=Result.PLAYING)
+    eliminatedResults = Result.objects.filter(game=game, state=Result.FINISHED).order_by('place')
 
-	
-    return HttpResponse(json.dumps({"success": True}), content_type="application/json")
+    result.place = len(playersStillActive)
+    result.amountWon = payouts.getPrizeForPlace(
+        len(playersStillActive) + len(eliminatedResults),
+        result.place,
+        game.buyin
+    )
+
+    result.state = Result.FINISHED
+    result.save()
+    print "Eliminating %s in %s place" % (player.nickname, result.placeAsOrdinal)
+
+    return redirect("/pokerroom/game/%d/view-game-in-progress" % game.id)
 
 def addResult(request, gameId):
     game = Game.objects.get(id=gameId)
@@ -357,11 +366,11 @@ def addResult(request, gameId):
         place = request.POST['place']
         amountWon = request.POST['amountWon']
 
-	result = Result.objects.filter(game=game, player=player)[0]
+    result = Result.objects.filter(game=game, player=player)[0]
 
-        result.place = place
-	result.amountWon = amountWon
-        result.save()
+    result.place = place
+    result.amountWon = amountWon
+    result.save()
 
     players = Player.objects.all()
 

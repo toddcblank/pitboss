@@ -1,11 +1,22 @@
 {% include "header.html" %}
 
-<body>
+<script type="text/javascript" src="/static/javascript/gameInProgress.js" >
+</script>
 <h1>Seating for {{ game }}</h1>
-
+<table class="table">
+    <thead>
+        <td colspan="*">Payouts</td>
+    </thead>
+    {% for payout in payouts %}
+    <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>${{ payout }}0</td>
+    </tr>
+    {% endfor %}
+</table>
 <table class="table table-hover" >
     <thead>
-        <td colspan="4" style="text-align: center">Interest List</td>
+        <td colspan="*" style="text-align: center">Player List</td>
     </thead>
     <tbody>
     {% for entry in playerList %}
@@ -13,10 +24,26 @@
             <td>{{ entry.seat }} </td>
             <td><img src="http://www.gravatar.com/avatar/{{ player.gravatarId }}" style="height: 32px"/></td>
             <td>{{ entry.player.nickname }} </td>
+            <td>
+                {% if entry.place > 0 %}
+                    Eliminated {{ entry.placeAsOrdinal }}
+                {% else %}
+                    <a href="javascript:eliminatePlayer({{ entry.player.id }})">Eliminate Player</a></td>
+                {% endif %}
+            <td>
 
+            </td>
         </tr>
     {% endfor %}
     </tbody>
 </table>
+
+<a href="/pokerroom/game/{{ game.id }}/unstart-game">Un-start game</a>
+
+<form name="eliminate-player" id="eliminate-player" action="/pokerroom/game/{{ game.id }}/eliminate-player" method="POST" onKeyPress="javascript:;">
+    {% csrf_token %}
+    <input type="hidden" id="eliminate-player-playerId" name="playerId" value="-1"/>
+</form>
+<input type="hidden" id="gameId" value="{{ game.id }}" />
 </body>
 </html>

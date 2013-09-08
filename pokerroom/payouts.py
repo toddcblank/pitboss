@@ -12,4 +12,10 @@ PAYOUTS = {
 }
 
 def getPrizeForPlace(players, place, buyin):
-	return PAYOUTS[players][place] * buyin
+    print PAYOUTS
+    print PAYOUTS[players]
+    if place > len(PAYOUTS[players]):
+        return 0
+
+    return PAYOUTS[players][place - 1] * buyin
+

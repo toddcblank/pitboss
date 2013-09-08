@@ -14,6 +14,8 @@ urlpatterns = patterns('',
     url(r'^game/(?P<gameId>\d+)/signup-newplayer/?$', views.createPlayerAndSignupForGame, name="createPlayerAndSignupForGame"),
     url(r'^game/(?P<gameId>\d+)/unsignup/?$', views.unsignupPlayerForGame, name="unsignupPlayerForGame"),
     url(r'^game/(?P<gameId>\d+)/start-game?$', views.startGame, name="startGame"),
+    url(r'^game/(?P<gameId>\d+)/unstart-game?$', views.unstartGame, name="unstartGame"),
+    url(r'^game/(?P<gameId>\d+)/eliminate-player?$', views.elminatePlayer, name="eliminatePlayer"),
     url(r'^game/(?P<gameId>\d+)/view-game-in-progress?$', views.viewGameInProgress, name="viewGameInProgress"),
     url(r'^game/(?P<gameId>\d+)/?$', views.viewResult, name="gameResult"),
 

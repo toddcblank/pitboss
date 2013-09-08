@@ -44,6 +44,7 @@ function reloadInterestTable(gameId) {
             jQuery.each(data.interestList, function (i, val) {
 
                 var newRow = "<tr>\n";
+                newRow += "<td>" + (i + 1) + "</td>"
                 newRow += "<td>" + val.player.nickname + "</td>\n";
                 switch(val.state){
                     case "Playing":
