@@ -151,7 +151,7 @@ class Result(models.Model):
         gameResults = Result.objects.filter(game=self.game, state=Result.FINISHED)
         numPlayers = len(gameResults)
 
-        return payouts.getPoyPointsForPlace(numPlayers, self.place)
+        return payouts.getPoyPointsForPlace(numPlayers, self.place, self.amountWon > 0)
 
     def __str__(self):
         if self.amountWon:
