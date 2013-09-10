@@ -3,8 +3,8 @@
 Leaderboard: <br />
 <ol>
 {% for player, points in leaderboard %}
-    {% if points > 0 %}
-  	<li> {{ player }} - {{ points }} </li>
+    {% if points > -10000 %}
+  	<li> <a href="/pokerroom/player/{{ player.id }}/">{{ player }}</a>:  {{ points }} </li>
     {% endif %}
 {% endfor %}	
 </ol>

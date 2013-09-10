@@ -11,6 +11,49 @@ import operator
 from django.contrib.auth import authenticate
 import payouts 
 
+def pointsLeaderboard(request):
+    pointsPerPlace = {
+        1: 10,
+        2:  8,
+        3:  6,
+        4:  5,
+        5:  4,
+        6:  3,
+        7:  2,
+        8:  1
+    }
+    players = Player.objects.all()
+    leaderboards = {player: 0 for player in players}
+
+    for player in players:
+	playerResults = Result.objects.filter(state=Result.FINISHED, player=player)
+	leaderboards[player] = sum([result.profit for result in playerResults])
+
+    tuples = sorted(leaderboards.iteritems(), key=operator.itemgetter(1))
+    tuples.reverse()
+    model = {
+        "leaderboard": tuples
+    }
+
+    return render(request, 'leaderboard.html', model)
+
+def moneyPerGameLeaderboard(request):
+    players = Player.objects.all()
+    leaderboards = {player: 0 for player in players}
+
+    for player in players:
+	playerResults = Result.objects.filter(state=Result.FINISHED, player=player)
+        if len(playerResults) > 0:
+            leaderboards[player] = sum([result.profit for result in playerResults])/len(playerResults)
+
+    tuples = sorted(leaderboards.iteritems(), key=operator.itemgetter(1))
+    tuples.reverse()
+    model = {
+        "leaderboard": tuples
+    }
+
+    return render(request, 'leaderboard.html', model)
+
 def leaderboard(request):
     players = Player.objects.all()
     results = Result.objects.filter(state=Result.FINISHED)
