@@ -29,5 +29,6 @@ urlpatterns = patterns('',
     url(r'^result/(?P<gameId>\d+)/add-result/?$', views.addResult, name="addResultForm"),
     url(r'^leaderboard/?$', views.leaderboard, name="leaderboards"),
     url(r'^leaderboard-pergame/?$', views.moneyPerGameLeaderboard, name="moneyPerGameLeaderboard"),
+    url(r'^poy-leaderboard/?$', views.pointsLeaderboard, name="pointsLeaderboard"),
     url(r'^login/?$', views.login, name="login"),
 )

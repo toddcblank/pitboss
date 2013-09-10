@@ -1,10 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
 import hashlib
+import payouts
 
 # Create your models here.
 class Player(models.Model):
-
     FACILITATOR = 100
     HIGH = 50
     NORMAL = 20
@@ -50,7 +50,8 @@ class Player(models.Model):
 
         if len(lastResults) > 0:
             lastResult = lastResults[0]
-            datePart = str(lastResult.game.datePlayed.year) + str(lastResult.game.datePlayed.month).zfill(2) + str(lastResult.game.datePlayed.day).zfill(2)
+            datePart = str(lastResult.game.datePlayed.year) + str(lastResult.game.datePlayed.month).zfill(2) + str(
+                lastResult.game.datePlayed.day).zfill(2)
             placePart = str(lastResult.place).zfill(2)
 
         return str(self.priority).zfill(3) + datePart + placePart
@@ -89,14 +90,14 @@ class Game(models.Model):
         }
 
     def __str__(self):
-        return "(%d) %s on %s" % (self.id, self.get_gameType_display(), self.datePlayed.__str__())
+        return "%s on %s" % (self.get_gameType_display(), self.datePlayed.__str__())
 
     @property
     def desc(self):
-        return "(%d) %s on %s" % (self.id, self.get_gameType_display(), self.datePlayed.__str__())
+        return "%s on %s" % (self.get_gameType_display(), self.datePlayed.__str__())
+
 
 class Result(models.Model):
-
     FINISHED = 3
     PLAYING = 2
     INTERESTED = 1
@@ -144,6 +145,13 @@ class Result(models.Model):
             return str(self.place) + self.suffixes[self.place % 100]
         else:
             return ""
+
+    @property
+    def poyPoints(self):
+        gameResults = Result.objects.filter(game=self.game, state=Result.FINISHED)
+        numPlayers = len(gameResults)
+
+        return payouts.getPoyPointsForPlace(numPlayers, self.place)
 
     def __str__(self):
         if self.amountWon:

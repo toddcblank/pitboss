@@ -9,25 +9,16 @@ from datetime import date
 from django.db.models import Q
 import operator
 from django.contrib.auth import authenticate
-import payouts 
+import payouts
+
 
 def pointsLeaderboard(request):
-    pointsPerPlace = {
-        1: 10,
-        2:  8,
-        3:  6,
-        4:  5,
-        5:  4,
-        6:  3,
-        7:  2,
-        8:  1
-    }
     players = Player.objects.all()
     leaderboards = {player: 0 for player in players}
 
     for player in players:
-	playerResults = Result.objects.filter(state=Result.FINISHED, player=player)
-	leaderboards[player] = sum([result.profit for result in playerResults])
+        playerResults = Result.objects.filter(state=Result.FINISHED, player=player)
+        leaderboards[player] = sum([result.poyPoints for result in playerResults])
 
     tuples = sorted(leaderboards.iteritems(), key=operator.itemgetter(1))
     tuples.reverse()
@@ -36,15 +27,16 @@ def pointsLeaderboard(request):
     }
 
     return render(request, 'leaderboard.html', model)
+
 
 def moneyPerGameLeaderboard(request):
     players = Player.objects.all()
     leaderboards = {player: 0 for player in players}
 
     for player in players:
-	playerResults = Result.objects.filter(state=Result.FINISHED, player=player)
+        playerResults = Result.objects.filter(state=Result.FINISHED, player=player)
         if len(playerResults) > 0:
-            leaderboards[player] = sum([result.profit for result in playerResults])/len(playerResults)
+            leaderboards[player] = sum([result.profit for result in playerResults]) / len(playerResults)
 
     tuples = sorted(leaderboards.iteritems(), key=operator.itemgetter(1))
     tuples.reverse()
@@ -53,6 +45,7 @@ def moneyPerGameLeaderboard(request):
     }
 
     return render(request, 'leaderboard.html', model)
+
 
 def leaderboard(request):
     players = Player.objects.all()
@@ -64,6 +57,7 @@ def leaderboard(request):
     tuples = sorted(leaderboards.iteritems(), key=operator.itemgetter(1))
     tuples.reverse()
     model = {
+        "leaderboardDescription": "Total Profit",
         "leaderboard": tuples
     }
 
@@ -162,6 +156,7 @@ def PlayerInfoView(request, playerId):
     }
 
     return render(request, 'player-detail.html', model)
+
 
 def signupPlayerForGame(request, gameId):
     playerId = request.POST['playerId']
@@ -295,6 +290,7 @@ def viewResult(request, gameId):
 
     return render(request, "view-result.html", model)
 
+
 def viewGameInProgress(request, gameId):
     game = Game.objects.get(id=gameId)
 
@@ -306,6 +302,8 @@ def viewGameInProgress(request, gameId):
         "payouts": [payout * game.buyin for payout in payouts.PAYOUTS[len(results)]]
     }
     return render(request, "view-game-in-progress.html", model)
+
+
 """
    Starts game with the current players that are approved.  should prevent further approving/signup
 
@@ -314,6 +312,8 @@ def viewGameInProgress(request, gameId):
        2. first found non-Todd facilitator gets seat 1
        3. Randomize the rest
 """
+
+
 def startGame(request, gameId):
     game = Game.objects.get(id=gameId)
 
@@ -360,9 +360,10 @@ def unstartGame(request, gameId):
         result.save()
 
     model = {
-        "playerList" : results
+        "playerList": results
     }
     return redirect("/pokerroom/game/%d/signup-form" % game.id)
+
 
 def elminatePlayer(request, gameId):
     game = Game.objects.get(id=gameId)
@@ -388,6 +389,7 @@ def elminatePlayer(request, gameId):
 
     return redirect("/pokerroom/game/%d/view-game-in-progress" % game.id)
 
+
 def undoElminatePlayer(request, gameId):
     game = Game.objects.get(id=gameId)
 
@@ -404,6 +406,7 @@ def undoElminatePlayer(request, gameId):
     print "un-Eliminating %s" % (player.nickname)
 
     return redirect("/pokerroom/game/%d/view-game-in-progress" % game.id)
+
 
 def addResult(request, gameId):
     game = Game.objects.get(id=gameId)

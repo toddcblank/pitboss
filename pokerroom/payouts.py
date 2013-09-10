@@ -31,3 +31,15 @@ def getPrizeForPlace(players, place, buyin):
 
     return PAYOUTS[players][place - 1] * buyin
 
+def getPoyPointsForPlace(numberOfPlayers, place):
+
+    defaultPoints = 7.5
+    topNinePoints = [100, 70, 50, 44, 38, 33, 28, 24, 20]
+
+    multiplier = numberOfPlayers/9
+
+    pointsForPlace = defaultPoints
+    if len(topNinePoints) > place - 1:
+        pointsForPlace = topNinePoints[place - 1]
+
+    return int(pointsForPlace * multiplier)
