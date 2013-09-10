@@ -36,7 +36,8 @@ def getPoyPointsForPlace(numberOfPlayers, place):
     defaultPoints = 7.5
     topNinePoints = [100, 70, 50, 44, 38, 33, 28, 24, 20]
 
-    multiplier = numberOfPlayers/9
+
+    multiplier = numberOfPlayers/9.0
 
     pointsForPlace = defaultPoints
     if len(topNinePoints) > place - 1:
