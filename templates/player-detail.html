@@ -16,12 +16,14 @@
         <td>Game</td>
         <td>Place</td>
         <td>Profit</td>
+        <td>PoY Points</td>
         </thead>
     {% for result in results %}
         <tr>
         <td><a href="/pokerroom/game/{{ result.game.id }}">{{ result.game }}</a></td>
         <td>{{ result.place }}</td>
         <td>{{ result.profit }}</td>
+        <td>{{ result.poyPoints}}</td>
         </tr>
     {% endfor %}
     </table>
