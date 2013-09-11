@@ -281,7 +281,7 @@ def createGameForm(request):
 
 def viewResult(request, gameId):
     game = Game.objects.get(id=gameId)
-    currentResults = Result.objects.filter(game=game).order_by('place')
+    currentResults = Result.objects.filter(game=game, state=Result.FINISHED).order_by('place')
 
     model = {
         'currentResults': currentResults,

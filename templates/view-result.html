@@ -4,15 +4,17 @@
 <table class="table  table-hover">
     <thead>
     <td>Place</td>
-    <td colspan="2">Player</td>
+    <td colspan="*">Player</td>
     <td>Amount Won</td>
+    <td>Player of the Year Points</td>
     </thead>
     {% for result in currentResults %}
         <tr>
             <td>{{ result.place }}</td>
-            <td><a href="/pokerroom/player/{{ result.player.id }}"><img src="http://www.gravatar.com/avatar/{{ result.player.gravatarId }}"/></a></td>
-            <td><a href="/pokerroom/player/{{ result.player.id }}">{{ result.player.name }}</a></td>
+{#            <td><a href="/pokerroom/player/{{ result.player.id }}"><img src="http://www.gravatar.com/avatar/{{ result.player.gravatarId }}"/></a></td>#}
+            <td><a href="/pokerroom/player/{{ result.player.id }}">{{ result.player.nickname }}</a></td>
             <td>${{ result.amountWon }}</td>
+            <td>{{ result.poyPoints}}</td>
         </tr>
     {% endfor %}
 </table>
