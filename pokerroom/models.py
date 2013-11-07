@@ -43,18 +43,17 @@ class Player(models.Model):
 
     @property
     def priorityIndex(self):
-        lastResults = Result.objects.filter(player=self, state=Result.FINISHED).order_by('game')
-
-        datePart = '99999999'
-        placePart = '999'
+        lastResults = Result.objects.filter(player=self, state=Result.FINISHED)
+        datePart = '00000000'
+        placePart = '00'
 
         if len(lastResults) > 0:
-            lastResult = lastResults[0]
+	    lastResult = sorted(lastResults, key=lambda result: result.game.datePlayed, reverse=True )[0]
             datePart = str(lastResult.game.datePlayed.year) + str(lastResult.game.datePlayed.month).zfill(2) + str(
                 lastResult.game.datePlayed.day).zfill(2)
-            placePart = str(lastResult.place).zfill(2)
+            placePart = str(100 - lastResult.place).zfill(2)
 
-        return str(self.priority).zfill(3) + datePart + placePart
+        return str(Player.FACILITATOR - self.priority).zfill(3) + datePart + placePart
 
     def asDict(self):
         return {
@@ -119,7 +118,7 @@ class Result(models.Model):
     amountWon = models.FloatField(default=0)
     state = models.IntegerField(default=NOT_SPECIFIED, choices=RESULT_STATE)
 
-    suffixes = ["th", "st", "nd", "rd", ] + ["th"] * 16
+    suffixes = ["th", "st", "nd", "rd", ] + ["th"] * 16 + ["th", "st","nd"]
 
 
     def asDict(self):

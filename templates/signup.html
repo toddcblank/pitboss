@@ -20,7 +20,7 @@
         <tr>
         <td>{{ forloop.counter }}</td>
 {#            <td><img src="http://www.gravatar.com/avatar/{{ player.gravatarId }}" style="height: 32px"/></td>#}
-            <td>{{ entry.player.nickname }} </td>
+            <td><a href="/pokerroom/player/{{ entry.player.id }}">{{ entry.player.nickname }}</a> </td>
             {% if entry.state == 2 %}
                 <td>Approved</td>
                 <td><a href="javascript:unsignup({{ entry.player.id }})">Cancel</a></td>

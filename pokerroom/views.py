@@ -91,22 +91,13 @@ def gameSignup(request, gameId):
     interestList = Result.objects.filter(game=game)
     sortedInterestList = sorted(
         interestList,
-        key=lambda result: (result.state, result.player.priorityIndex),
-        reverse=True
+        key=lambda result: (result.state * -1, int(result.player.priorityIndex))
     )
 
-    approvedPlayers = Result.objects.filter(game=game, state=Result.PLAYING)
-    interestedPlayers = Result.objects.filter(game=game, state=Result.INTERESTED)
-    uninterestedPlayers = Result.objects.filter(game=game, state=Result.NOT_INTERESTED)
-    unsignedupPlayers = Player.objects.all()
 
     model = {
         'game': game,
         'sortedInterestList': sortedInterestList,
-        'approvedPlayers': approvedPlayers,
-        'interestedPlayers': sorted(interestedPlayers, key=lambda result: result.player.priorityIndex, reverse=True),
-        'unsignedupPlayers': unsignedupPlayers,
-        'uninterestedPlayers': uninterestedPlayers,
     }
 
     return render(request, 'signup.html', model)
@@ -123,7 +114,7 @@ class allGames(generic.ListView):
     context_object_name = 'games'
 
     def get_queryset(self):
-        return Game.objects.all()
+        return sorted(Game.objects.all(), key=lambda x: x.datePlayed, reverse=True)
 
 
 class AllPlayersView(generic.ListView):
@@ -136,7 +127,7 @@ class AllPlayersView(generic.ListView):
 
 def PlayerInfoView(request, playerId):
     player = Player.objects.get(id=playerId)
-    playerResults = Result.objects.filter(player=player, state=Result.FINISHED)
+    playerResults = sorted(Result.objects.filter(player=player, state=Result.FINISHED), key=lambda x: x.game.datePlayed, reverse=True) 
     totalWon = sum(result.amountWon for result in playerResults)
     totalSpent = sum(result.game.buyin for result in playerResults)
     totalProfit = totalWon - totalSpent
@@ -173,7 +164,7 @@ def approvePlayerForGame(request, gameId):
 def unsignupPlayerForGame(request, gameId):
     playerId = request.POST['playerId']
     print 'Removing interest for player %s in game %s' % (playerId, gameId)
-    return updatePlayerInterestInGame(playerId, gameId, Result.NOT_INTERESTED)
+    return updatePlayerInterestInGame(playerId, gameId, Result.INTERESTED)
 
 
 def updatePlayerInterestInGame(playerId, gameId, newState):
@@ -203,8 +194,10 @@ def interestListJson(request, gameId):
     game = Game.objects.get(id=gameId)
 
     interestList = Result.objects.filter(game=game)
-    sortedInterestList = sorted(interestList, key=lambda result: (result.state, result.player.priorityIndex),
-                                reverse=True)
+    sortedInterestList = sorted(
+        interestList,
+        key=lambda result: (result.state * -1, int(result.player.priorityIndex))
+    )
 
     return HttpResponse(json.dumps({
         'interestList': [i.asDict() for i in sortedInterestList]
@@ -337,7 +330,7 @@ def startGame(request, gameId):
     for result in results:
         if result.player.nickname == "Todd Blank":
             pass
-        elif result.player.priority == result.player.FACILITATOR and not dealerFound:
+        elif (result.player.priority == result.player.HIGH or result.player.priority == result.player.FACILITATOR) and not dealerFound:
             result.seat = 1
             result.save()
             dealerFound = True
