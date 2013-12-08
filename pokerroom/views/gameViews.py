@@ -93,7 +93,7 @@ def gameSignup(request, gameId):
     interestList = Result.objects.filter(game=game)
     sortedInterestList = sorted(
         interestList,
-        key=lambda result: (result.state, result.player.priorityIndex),
+        key=lambda result: (result.state * -1, int(result.player.priorityIndex)),
         reverse=True
     )
 
@@ -175,7 +175,7 @@ def approvePlayerForGame(request, gameId):
 def unsignupPlayerForGame(request, gameId):
     playerId = request.POST['playerId']
     print 'Removing interest for player %s in game %s' % (playerId, gameId)
-    return updatePlayerInterestInGame(playerId, gameId, Result.NOT_INTERESTED)
+    return updatePlayerInterestInGame(playerId, gameId, Result.NOT_SPECIFIED)
 
 
 def updatePlayerInterestInGame(playerId, gameId, newState):
@@ -205,8 +205,10 @@ def interestListJson(request, gameId):
     game = Game.objects.get(id=gameId)
 
     interestList = Result.objects.filter(game=game)
-    sortedInterestList = sorted(interestList, key=lambda result: (result.state, result.player.priorityIndex),
-                                reverse=True)
+    sortedInterestList = sorted(
+        interestList,
+        key=lambda result: (result.state * -1, int(result.player.priorityIndex))
+    )
 
     return HttpResponse(json.dumps({
         'interestList': [i.asDict() for i in sortedInterestList]
@@ -528,7 +530,8 @@ class allGames(generic.ListView):
     context_object_name = 'games'
 
     def get_queryset(self):
-        return Game.objects.all()
+        return sorted(Game.objects.all(), key=lambda x: x.datePlayed, reverse=True)
+
 
 @login_required(login_url='/pokerroom/login')
 def gameSignup(request, gameId):
@@ -537,7 +540,7 @@ def gameSignup(request, gameId):
     interestList = Result.objects.filter(game=game)
     sortedInterestList = sorted(
         interestList,
-        key=lambda result: (result.state, result.player.priorityIndex),
+        key=lambda result: (result.state * -1, int(result.player.priorityIndex)),
         reverse=True
     )
 
