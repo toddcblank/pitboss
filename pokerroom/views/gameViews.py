@@ -1,15 +1,17 @@
-# Create your views here.
+from django.contrib.auth.decorators import login_required
+
+__author__ = 'Todd'
+
+# Create views related to games here.
 import json
 import random
-from django.http import Http404, HttpResponse, HttpResponseServerError
+from django.http import HttpResponse
 from pokerroom.models import Player, Game, Result
-from django.shortcuts import render, render_to_response, redirect
+from django.shortcuts import render, redirect
 from django.views import generic
 from datetime import date
 from django.db.models import Q
-import operator
-from django.contrib.auth import authenticate
-import payouts
+from pokerroom import payouts
 
 
 def pointsLeaderboard(request):
@@ -91,13 +93,22 @@ def gameSignup(request, gameId):
     interestList = Result.objects.filter(game=game)
     sortedInterestList = sorted(
         interestList,
-        key=lambda result: (result.state * -1, int(result.player.priorityIndex))
+        key=lambda result: (result.state, result.player.priorityIndex),
+        reverse=True
     )
 
+    approvedPlayers = Result.objects.filter(game=game, state=Result.PLAYING)
+    interestedPlayers = Result.objects.filter(game=game, state=Result.INTERESTED)
+    uninterestedPlayers = Result.objects.filter(game=game, state=Result.NOT_INTERESTED)
+    unsignedupPlayers = Player.objects.all()
 
     model = {
         'game': game,
         'sortedInterestList': sortedInterestList,
+        'approvedPlayers': approvedPlayers,
+        'interestedPlayers': sorted(interestedPlayers, key=lambda result: result.player.priorityIndex, reverse=True),
+        'unsignedupPlayers': unsignedupPlayers,
+        'uninterestedPlayers': uninterestedPlayers,
     }
 
     return render(request, 'signup.html', model)
@@ -114,7 +125,7 @@ class allGames(generic.ListView):
     context_object_name = 'games'
 
     def get_queryset(self):
-        return sorted(Game.objects.all(), key=lambda x: x.datePlayed, reverse=True)
+        return Game.objects.all()
 
 
 class AllPlayersView(generic.ListView):
@@ -127,7 +138,7 @@ class AllPlayersView(generic.ListView):
 
 def PlayerInfoView(request, playerId):
     player = Player.objects.get(id=playerId)
-    playerResults = sorted(Result.objects.filter(player=player, state=Result.FINISHED), key=lambda x: x.game.datePlayed, reverse=True) 
+    playerResults = Result.objects.filter(player=player, state=Result.FINISHED)
     totalWon = sum(result.amountWon for result in playerResults)
     totalSpent = sum(result.game.buyin for result in playerResults)
     totalProfit = totalWon - totalSpent
@@ -164,7 +175,7 @@ def approvePlayerForGame(request, gameId):
 def unsignupPlayerForGame(request, gameId):
     playerId = request.POST['playerId']
     print 'Removing interest for player %s in game %s' % (playerId, gameId)
-    return updatePlayerInterestInGame(playerId, gameId, Result.INTERESTED)
+    return updatePlayerInterestInGame(playerId, gameId, Result.NOT_INTERESTED)
 
 
 def updatePlayerInterestInGame(playerId, gameId, newState):
@@ -194,10 +205,8 @@ def interestListJson(request, gameId):
     game = Game.objects.get(id=gameId)
 
     interestList = Result.objects.filter(game=game)
-    sortedInterestList = sorted(
-        interestList,
-        key=lambda result: (result.state * -1, int(result.player.priorityIndex))
-    )
+    sortedInterestList = sorted(interestList, key=lambda result: (result.state, result.player.priorityIndex),
+                                reverse=True)
 
     return HttpResponse(json.dumps({
         'interestList': [i.asDict() for i in sortedInterestList]
@@ -263,11 +272,6 @@ def createGame(request):
         result.save()
     return redirect("/pokerroom/game/%d/signup-form" % game.id)
 
-
-def createPlayerForm(request):
-    return render(request, 'create-player-form.html')
-
-
 def createGameForm(request):
     return render(request, 'create-game-form.html')
 
@@ -288,6 +292,8 @@ def viewGameInProgress(request, gameId):
     game = Game.objects.get(id=gameId)
 
     results = Result.objects.filter(Q(game=game, state=Result.PLAYING) | Q(game=game, state=Result.FINISHED))
+    if len(results) == 0:
+        return redirect("/pokerroom/game/%d/signup-form" % game.id)
 
     model = {
         "game": game,
@@ -433,3 +439,120 @@ def addResult(request, gameId):
     }
 
     return render(request, "add-result.html", model)
+
+def createPlayerAndSignupForGame(request, gameId):
+    nickname = request.POST['nickname']
+    existingUser = Player.objects.filter(nickname=nickname)
+    game = Game.objects.get(id=gameId)
+
+    player = None
+    if len(existingUser) == 0:
+        print "Found no users with nickname %s " % nickname
+        player = Player(nickname=nickname)
+        player.save()
+
+    else:
+        print "Found existing user with nickname %s " % nickname
+        player = existingUser[0]
+
+    existingSignup = Result.objects.filter(game=game, player=player)
+    result = None
+    if len(existingSignup) == 0:
+        result = Result(
+            game=game,
+            player=player,
+            state=Result.INTERESTED
+        )
+    else:
+        result = existingSignup[0]
+        result.state = Result.INTERESTED
+
+    result.save()
+
+    return HttpResponse(json.dumps({"success": True}), content_type="application/json")
+
+def interestListJson(request, gameId):
+    game = Game.objects.get(id=gameId)
+
+    interestList = Result.objects.filter(game=game)
+    sortedInterestList = sorted(interestList, key=lambda result: (result.state, result.player.priorityIndex),
+                                reverse=True)
+
+    return HttpResponse(json.dumps({
+        'interestList': [i.asDict() for i in sortedInterestList]
+    }), content_type="application/json")
+
+@login_required(login_url='/pokerroom/login')
+def signupPlayerForGame(request, gameId):
+    playerId = request.POST['playerId']
+    print 'Adding interest for player %s in game %s' % (playerId, gameId)
+    return updatePlayerInterestInGame(playerId, gameId, Result.INTERESTED)
+
+@login_required(login_url='/pokerroom/login')
+def approvePlayerForGame(request, gameId):
+    playerId = request.POST['playerId']
+    print 'Adding interest for player %s in game %s' % (playerId, gameId)
+    return updatePlayerInterestInGame(playerId, gameId, Result.PLAYING)
+
+@login_required(login_url='/pokerroom/login')
+def unsignupPlayerForGame(request, gameId):
+    playerId = request.POST['playerId']
+    print 'Removing interest for player %s in game %s' % (playerId, gameId)
+    return updatePlayerInterestInGame(playerId, gameId, Result.NOT_SPECIFIED)
+
+def updatePlayerInterestInGame(playerId, gameId, newState):
+    player = Player.objects.get(id=playerId)
+    game = Game.objects.get(id=gameId)
+    #try:
+    existingResults = Result.objects.filter(game=game, player=player)
+
+    if len(existingResults) >= 1:
+        existingResult = existingResults[0]
+        print 'Found existing result for player %d for gameId %d' % (player.id, game.id)
+        existingResult.state = newState
+        existingResult.save()
+    else:
+        result = Result(
+            game=game,
+            player=player,
+            state=newState
+        )
+        print 'Creating new result for game %d player %d state %d' % (game.id, player.id, newState)
+        result.save()
+
+    return HttpResponse(json.dumps({}), content_type="application/json")
+
+
+class allGames(generic.ListView):
+    template_name = 'all-games.html'
+    context_object_name = 'games'
+
+    def get_queryset(self):
+        return Game.objects.all()
+
+@login_required(login_url='/pokerroom/login')
+def gameSignup(request, gameId):
+    game = Game.objects.get(id=gameId)
+
+    interestList = Result.objects.filter(game=game)
+    sortedInterestList = sorted(
+        interestList,
+        key=lambda result: (result.state, result.player.priorityIndex),
+        reverse=True
+    )
+
+    approvedPlayers = Result.objects.filter(game=game, state=Result.PLAYING)
+    interestedPlayers = Result.objects.filter(game=game, state=Result.INTERESTED)
+    uninterestedPlayers = Result.objects.filter(game=game, state=Result.NOT_INTERESTED)
+    unsignedupPlayers = Player.objects.all()
+
+    model = {
+        'game': game,
+        'sortedInterestList': sortedInterestList,
+        'approvedPlayers': approvedPlayers,
+        'interestedPlayers': sorted(interestedPlayers, key=lambda result: result.player.priorityIndex, reverse=True),
+        'unsignedupPlayers': unsignedupPlayers,
+        'uninterestedPlayers': uninterestedPlayers,
+    }
+
+    return render(request, 'signup.html', model)

@@ -13,7 +13,13 @@
     $( "#datepicker" ).datepicker();
   });
   </script>
-<div id="links">
-<h2><a href="/pokerroom/game">Games</a> - <a href="/pokerroom/player">Players</a> - <a href="/pokerroom/leaderboard">Leaderboard</a></h2>
+<div id="topbar" class="navbar-static-top">
+    <h2>
+        <div>
+            <div>
+                <a href="/pokerroom/game">Games</a> - <a href="/pokerroom/player">Players</a> - <a href="/pokerroom/leaderboard">Leaderboard</a>
+            </div>
+            <div id="usercard" >{% include "user-card.html" %}</div>
+        </div>
+    </h2>
 </div>
-<div id="usercard">{% include "user-card.html" %}</div>

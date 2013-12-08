@@ -38,7 +38,9 @@ class Player(models.Model):
     def gravatarId(self):
         #this is kind of wasteful to recalculate every request.  but meh.
         md = hashlib.md5()
-        md.update(self.user.email.strip().lower())
+        email = self.user.email.strip().lower()
+        print "user email is %s" % self.user.email
+        md.update(email)
         return md.hexdigest()
 
     @property
