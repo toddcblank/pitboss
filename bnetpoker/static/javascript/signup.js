@@ -69,8 +69,8 @@ function reloadInterestTable(gameId) {
 
             $("#interestTableDiv").empty();
             $("#interestTableDiv").append($newTable);
-
         });
+
 }
 
 function createPlayerAndSignup() {
@@ -82,6 +82,7 @@ function createPlayerAndSignup() {
 
 }
 
+//Override the enter key while they're in the add player input to submit via ajax
 $(document).ready(function () {
     $('#create-and-signup input').keydown(function (e) {
         if (e.keyCode == 13) {

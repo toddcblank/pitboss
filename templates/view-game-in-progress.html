@@ -31,7 +31,9 @@
                     <a href="javascript:eliminatePlayer({{ entry.player.id }})">Eliminate Player</a></td>
                 {% endif %}
             <td>
-
+            <td>
+                <a href="javascript:removePlayer({{ entry.player.id }})">Remove Player</a></td>
+            <td>
             </td>
         </tr>
     {% endfor %}
@@ -48,7 +50,10 @@
     {% csrf_token %}
     <input type="hidden" id="undo-eliminate-player-playerId" name="playerId" value="-1"/>
 </form>
-
+<form name="remove-player" id="remove-player" action="/pokerroom/game/{{ game.id }}/remove-player" method="POST" onKeyPress="javascript:;">
+    {% csrf_token %}
+    <input type="hidden" id="remove-player-playerId" name="playerId" value="-1"/>
+</form>
 <input type="hidden" id="gameId" value="{{ game.id }}" />
 </body>
 </html>

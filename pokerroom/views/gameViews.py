@@ -93,22 +93,13 @@ def gameSignup(request, gameId):
     interestList = Result.objects.filter(game=game)
     sortedInterestList = sorted(
         interestList,
-        key=lambda result: (result.state * -1, int(result.player.priorityIndex)),
-        reverse=True
+        key=lambda result: (result.state * -1, int(result.player.priorityIndex))
     )
 
-    approvedPlayers = Result.objects.filter(game=game, state=Result.PLAYING)
-    interestedPlayers = Result.objects.filter(game=game, state=Result.INTERESTED)
-    uninterestedPlayers = Result.objects.filter(game=game, state=Result.NOT_INTERESTED)
-    unsignedupPlayers = Player.objects.all()
 
     model = {
         'game': game,
-        'sortedInterestList': sortedInterestList,
-        'approvedPlayers': approvedPlayers,
-        'interestedPlayers': sorted(interestedPlayers, key=lambda result: result.player.priorityIndex, reverse=True),
-        'unsignedupPlayers': unsignedupPlayers,
-        'uninterestedPlayers': uninterestedPlayers,
+        'sortedInterestList': sortedInterestList
     }
 
     return render(request, 'signup.html', model)
@@ -177,11 +168,29 @@ def unsignupPlayerForGame(request, gameId):
     print 'Removing interest for player %s in game %s' % (playerId, gameId)
     return updatePlayerInterestInGame(playerId, gameId, Result.NOT_SPECIFIED)
 
+def removePlayerFromGameInProgress(request, gameId):
+    playerId = request.POST['playerId']
+    print 'Removing player %s from in progress game %s' % (playerId, gameId)
+
+    updatePlayerInterestInGame(playerId, gameId, Result.NOT_SPECIFIED)
+
+    #We need to update everyone who has been eliminated to move up one spot
+    game = Game.objects.get(id=gameId)
+    existingFinishedResults = Result.objects.filter(game=game, state=Result.FINISHED)
+    for result in existingFinishedResults:
+        result.place = result.place - 1
+        result.save()
+
+    return redirect("/pokerroom/game/%d/view-game-in-progress" % game.id)
+
+#NYI - would be nice to be able to just add people as a game has started.  Need to think of a good way to do this.
+def addPlayerToGameInProgress(request, gameId):
+    return redirect("/pokerroom/game/%d/view-game-in-progress" % game.id)
+
 
 def updatePlayerInterestInGame(playerId, gameId, newState):
     player = Player.objects.get(id=playerId)
     game = Game.objects.get(id=gameId)
-    #try:
     existingResults = Result.objects.filter(game=game, player=player)
 
     if len(existingResults) >= 1:
@@ -199,21 +208,6 @@ def updatePlayerInterestInGame(playerId, gameId, newState):
         result.save()
 
     return HttpResponse(json.dumps({}), content_type="application/json")
-
-
-def interestListJson(request, gameId):
-    game = Game.objects.get(id=gameId)
-
-    interestList = Result.objects.filter(game=game)
-    sortedInterestList = sorted(
-        interestList,
-        key=lambda result: (result.state * -1, int(result.player.priorityIndex))
-    )
-
-    return HttpResponse(json.dumps({
-        'interestList': [i.asDict() for i in sortedInterestList]
-    }), content_type="application/json")
-
 
 def createPlayerAndSignupForGame(request, gameId):
     nickname = request.POST['nickname']
@@ -540,22 +534,12 @@ def gameSignup(request, gameId):
     interestList = Result.objects.filter(game=game)
     sortedInterestList = sorted(
         interestList,
-        key=lambda result: (result.state * -1, int(result.player.priorityIndex)),
-        reverse=True
+        key=lambda result: (result.state * -1, int(result.player.priorityIndex))
     )
-
-    approvedPlayers = Result.objects.filter(game=game, state=Result.PLAYING)
-    interestedPlayers = Result.objects.filter(game=game, state=Result.INTERESTED)
-    uninterestedPlayers = Result.objects.filter(game=game, state=Result.NOT_INTERESTED)
-    unsignedupPlayers = Player.objects.all()
 
     model = {
         'game': game,
         'sortedInterestList': sortedInterestList,
-        'approvedPlayers': approvedPlayers,
-        'interestedPlayers': sorted(interestedPlayers, key=lambda result: result.player.priorityIndex, reverse=True),
-        'unsignedupPlayers': unsignedupPlayers,
-        'uninterestedPlayers': uninterestedPlayers,
     }
 
     return render(request, 'signup.html', model)
