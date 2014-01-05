@@ -2,3 +2,4 @@
 *.idea
 *.pyc
 *.sqlitedb
+bnetpoker/settings.py

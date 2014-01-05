@@ -99,6 +99,7 @@ class Game(models.Model):
 
 
 class Result(models.Model):
+    PAID = 4
     FINISHED = 3
     PLAYING = 2
     INTERESTED = 1
@@ -110,7 +111,8 @@ class Result(models.Model):
         (PLAYING, "Playing"),
         (INTERESTED, "Interested"),
         (NOT_SPECIFIED, "Not Specified"),
-        (NOT_INTERESTED, "Not Interested")
+        (NOT_INTERESTED, "Not Interested"),
+        (PAID, "Paid")
     ]
 
     game = models.ForeignKey(Game)
@@ -120,7 +122,7 @@ class Result(models.Model):
     amountWon = models.FloatField(default=0)
     state = models.IntegerField(default=NOT_SPECIFIED, choices=RESULT_STATE)
 
-    suffixes = ["th", "st", "nd", "rd", ] + ["th"] * 16 + ["th", "st","nd"]
+    suffixes = ["th", "st", "nd", "rd", ] + ["th"] * 16 + ["th", "st", "nd"]
 
 
     def asDict(self):

@@ -16,11 +16,13 @@
 </table>
 <table class="table table-hover" >
     <thead>
+        <td colspan="1" style="text-align: center">Paid</td>
         <td colspan="*" style="text-align: center">Player List</td>
     </thead>
     <tbody>
     {% for entry in playerList %}
         <tr>
+            <td><input type="checkbox" id="paid"></td>
             <td>{{ entry.seat }} </td>
             <td><img src="http://www.gravatar.com/avatar/{{ player.gravatarId }}" style="height: 32px"/></td>
             <td>{{ entry.player.nickname }} </td>
