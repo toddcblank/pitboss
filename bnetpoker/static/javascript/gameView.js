@@ -4,6 +4,12 @@ function eliminatePlayer(playerId) {
     $('#eliminate-player-playerId').val(playerId)
     form.submit();
 }
+function playerInterested(playerId) {
+
+    var form = $('#player-interested')
+    $('#interested-player-playerId').val(playerId)
+    form.submit();
+}
 
 function balanceTables() {
 

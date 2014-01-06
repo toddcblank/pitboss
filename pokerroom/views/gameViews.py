@@ -552,8 +552,8 @@ def gameViewEndpoint(request, gameId):
     model = {
         'gamePlayerList': sorted(playersInGame, key=lambda x: x.seat + x.table * 100),
         'finishedPlayers': sorted(finishedPlayers, key=lambda x: x.place),
-        'interestList': interestedPlayers,
-        'otherPlayers': otherPlayers,
+        'interestList': sorted(interestedPlayers, key=lambda x: x.nickname),
+        'otherPlayers': sorted(otherPlayers, key=lambda x: x.nickname),
         'game': game,
         'payouts': [payout * game.buyin for payout in payouts.PAYOUTS[len(playersInGame) + len(finishedPlayers)]]
     }
@@ -588,6 +588,14 @@ def balanceTablesPost(request, gameId):
     balanceTables(gameId, 1, 10)
     return redirect("/pokerroom/game/%s/game-view" % gameId)
 
+def playerInterestedPost(request, gameId):
+    game = Game.objects.get(id=gameId)
+    if 'playerId' in request.POST:
+        player = Player.objects.get(id=request.POST['playerId'])
+        playerResult = Result.objects.filter(game=game, player=player)[0]
+        playerResult.state = Result.INTERESTED
+        playerResult.save()
+    return redirect("/pokerroom/game/%s/game-view" % gameId)
 ### Common Methods ###
 def seatPlayerInGame(gameId, playerId):
     game = Game.objects.get(id=gameId)

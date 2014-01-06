@@ -5,7 +5,7 @@
 <div id="payouts" class="payout-table">
     <div class="table-bordered">
         <div class="row">
-            <div class="twocol">Payouts</div>
+            <div class="twocol table-label-header">Payouts</div>
         </div>
         {% for payout in payouts %}
             <div class="row">
@@ -21,7 +21,7 @@
     <div id="in-game-players" class="players-in-game">
 
 
-        <div>Active Players</div>
+        <div class="table-label-header">Active Players</div>
         <div id="active-players">
             <div id="active-table-1" class="table-bordered">
                 <div class="row">
@@ -44,7 +44,7 @@
                 {% endfor %}
             </div>
         </div>
-        <div>Eliminated Players</div>
+        <div class="table-label-header">Eliminated Players</div>
         <div id="eliminated-players">
             <div id="eliminated-players-table" class="table-bordered">
                 <div class="row">
@@ -68,7 +68,7 @@
     </div>
     {% if interestList|length > 0 %}
     <div id="playerlist-interested" class="player-interested">
-        <div>Interested Players</div>
+        <div class="table-label-header">Interested Players</div>
         <div id="player-feed" class="table-bordered">
         <div id="interested-players">
             <div id="interested-players-table" class="table">
@@ -84,17 +84,18 @@
     {% endif %}
 </div>
 <div id="all-other-players">
-    <div>Available Players:</div>
+    <div class="table-label-header">Available Players:</div>
     <div id="available-players">
-        <div id="available-players-table" class="table-bordered">
+        <div id="available-players-table" class="table-bordered all-players">
             <div class="row">
                 <div class="cell twocol">Player</div>
                 <div class="cell twocol"></div>
             </div>
             {% for player in otherPlayers %}
                 <div class="row">
-                    <div class="cell twocol">{{ player.nickname }}</div>
-                    <div class="cell twocol"><a href="javascript:seatPlayer({{ player.id }});">Seat Player</a></div>
+                    <div class="cell threecol">{{ player.nickname }}</div>
+                    <div class="cell threecol"><a href="javascript:seatPlayer({{ player.id }});">Seat Player</a></div>
+                    <div class="cell threecol"><a href="javascript:playerInterested({{ player.id }});">Player Interested</a></div>
                 </div>
             {% endfor %}
         </div>
@@ -122,4 +123,9 @@
 
 <form id="balance-tables" action="balance-tables" method="POST">
     {% csrf_token %}
+</form>
+
+<form id="player-interested" action="player-interested" method="POST">
+    {% csrf_token %}
+    <input type="hidden" id="interested-player-playerId" name="playerId" value="-1"/>
 </form>
