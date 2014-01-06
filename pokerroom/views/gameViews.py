@@ -606,9 +606,9 @@ def seatPlayerInGame(gameId, playerId):
 
     table, seat = getRandomOpenSeat(game)
 
-    if player.priorityIndex == Player.FACILITATOR:
-        dealerPresent = Result.objects.filter(game=game, table=1, seat=1)
-
+    if player.priority == Player.FACILITATOR:
+        dealerPresent = Result.objects.filter(game=game, table=1, seat=1, state=Result.PLAYING)
+        
         #put facilitators in dealer seat if there's no one there.
         if not dealerPresent:
             table = 1
