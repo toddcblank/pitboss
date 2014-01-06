@@ -5,6 +5,7 @@ __author__ = 'Todd'
 # Create views related to games here.
 import json
 import random
+import math
 from django.http import HttpResponse
 from pokerroom.models import Player, Game, Result
 from django.shortcuts import render, redirect
@@ -12,6 +13,7 @@ from django.views import generic
 from datetime import date
 from django.db.models import Q
 from pokerroom import payouts
+from random import choice
 
 
 def pointsLeaderboard(request):
@@ -360,47 +362,7 @@ def unstartGame(request, gameId):
     return redirect("/pokerroom/game/%d/signup-form" % game.id)
 
 
-def elminatePlayer(request, gameId):
-    game = Game.objects.get(id=gameId)
 
-    playerId = request.POST['playerId']
-    player = Player.objects.get(id=playerId)
-
-    result = Result.objects.filter(game=game, player=player)[0]
-
-    playersStillActive = Result.objects.filter(game=game, state=Result.PLAYING)
-    eliminatedResults = Result.objects.filter(game=game, state=Result.FINISHED).order_by('place')
-
-    result.place = len(playersStillActive)
-    result.amountWon = payouts.getPrizeForPlace(
-        len(playersStillActive) + len(eliminatedResults),
-        result.place,
-        game.buyin
-    )
-
-    result.state = Result.FINISHED
-    result.save()
-    print "Eliminating %s in %s place" % (player.nickname, result.placeAsOrdinal)
-
-    return redirect("/pokerroom/game/%d/view-game-in-progress" % game.id)
-
-
-def undoElminatePlayer(request, gameId):
-    game = Game.objects.get(id=gameId)
-
-    playerId = request.POST['playerId']
-    player = Player.objects.get(id=playerId)
-
-    result = Result.objects.filter(game=game, player=player)[0]
-
-    result.place = None
-    result.amountWon = 0
-
-    result.state = Result.PLAYING
-    result.save()
-    print "un-Eliminating %s" % (player.nickname)
-
-    return redirect("/pokerroom/game/%d/view-game-in-progress" % game.id)
 
 
 def addResult(request, gameId):
@@ -543,3 +505,251 @@ def gameSignup(request, gameId):
     }
 
     return render(request, 'signup.html', model)
+
+
+### Everything above is old, and possibly deprecated, and needs to be cleaned up
+def getRandomOpenSeatForTable(game, table):
+    activePlayers = Result.objects.filter(game=game, state=Result.PLAYING, table=table)
+    seatsPerTable = 10
+    allSeats = range(0, seatsPerTable)
+    for activePlayer in activePlayers:
+        allSeats.remove(activePlayer.seat - 1)
+
+    return choice(allSeats) + 1
+
+#finds an open seat in a game
+def getRandomOpenSeat(game):
+
+    activePlayers = Result.objects.filter(game=game, state=Result.PLAYING)
+
+    #these could fluctuate if we get a lot of players
+    seatsPerTable = 10
+    numTables = 2
+    allSeats = range(0, seatsPerTable * numTables)
+
+    for activePlayer in activePlayers:
+        allSeats.remove((activePlayer.table - 1) * seatsPerTable + (activePlayer.seat - 1))
+
+    seat = choice(allSeats)
+    seatValue = (seat % seatsPerTable) + 1
+    tableValue = math.floor(float(seat)/seatsPerTable) + 1
+
+    return tableValue, seatValue
+
+
+# Seats a player in the game.  This will random them to a seat on one of two tables
+# it will NOT keep the tables balanced
+
+#### Endpoints ###
+def gameViewEndpoint(request, gameId):
+    game = Game.objects.get(id=gameId)
+
+    playersInGame = Result.objects.filter(game=game, state=Result.PLAYING)
+    finishedPlayers = Result.objects.filter(game=game, state=Result.FINISHED)
+    interestedPlayers = [r.player for r in Result.objects.filter(game=game, state=Result.INTERESTED)]
+    otherPlayers = [r.player for r in Result.objects.filter(game=game, state=Result.NOT_SPECIFIED)]
+
+    model = {
+        'gamePlayerList': sorted(playersInGame, key=lambda x: x.seat + x.table * 100),
+        'finishedPlayers': sorted(finishedPlayers, key=lambda x: x.place),
+        'interestList': interestedPlayers,
+        'otherPlayers': otherPlayers,
+        'game': game,
+        'payouts': [payout * game.buyin for payout in payouts.PAYOUTS[len(playersInGame) + len(finishedPlayers)]]
+    }
+
+    return render(request, 'game-view.html', model)
+
+def seatPlayerPost(request, gameId):
+    if 'playerId' in request.POST:
+        seatPlayerInGame(gameId, request.POST['playerId'])
+
+    return redirect("/pokerroom/game/%s/game-view" % gameId)
+
+def elminatePlayerPost(request, gameId):
+    if 'playerId' in request.POST:
+        elminatePlayer(gameId, request.POST['playerId'])
+
+    return redirect("/pokerroom/game/%s/game-view" % gameId)
+
+def undoElminatePlayerPost(request, gameId):
+    if 'playerId' in request.POST:
+        undoElminatePlayer(gameId, request.POST['playerId'])
+
+    return redirect("/pokerroom/game/%s/game-view" % gameId)
+
+def unseatPlayerPost(request, gameId):
+    if 'playerId' in request.POST:
+        unseatPlayer(gameId, request.POST['playerId'])
+
+    return redirect("/pokerroom/game/%s/game-view" % gameId)
+
+def balanceTablesPost(request, gameId):
+    balanceTables(gameId, 1, 10)
+    return redirect("/pokerroom/game/%s/game-view" % gameId)
+
+### Common Methods ###
+def seatPlayerInGame(gameId, playerId):
+    game = Game.objects.get(id=gameId)
+    player = Player.objects.get(id=playerId)
+
+    result = Result.objects.filter(game=game, player=player)[0]
+    result.state = Result.PLAYING
+
+    table, seat = getRandomOpenSeat(game)
+    result.table = table
+    result.seat = seat
+
+    result.save()
+
+    #check if we have any finished players, if we do we need to bump them down
+    eliminatedPlayers = Result.objects.filter(game=game, state=Result.FINISHED)
+    for eliminatedPlayer in eliminatedPlayers:
+        eliminatedPlayer.place = eliminatedPlayer.place + 1
+        eliminatedPlayer.save()
+
+#Unseats a player, in case we seated the wrong one.
+def unseatPlayer(gameId, playerId):
+    game = Game.objects.get(id=gameId)
+    player = Player.objects.get(id=playerId)
+
+    result = Result.objects.filter(game=game, player=player)[0]
+    result.state = Result.INTERESTED
+    result.table = None
+    result.seat = None
+    result.save()
+
+    #check if we have any finished players, if we do we need to bump them up
+    eliminatedPlayers = Result.objects.filter(game=game, state=Result.FINISHED)
+    for eliminatedPlayer in eliminatedPlayers:
+        eliminatedPlayer.place = eliminatedPlayer.place - 1
+        eliminatedPlayer.save()
+
+def breakTable(game, table):
+    print "Breaking up table %d" % table
+    playersToMove = Result.objects.filter(game=game, state=Result.PLAYING, table=table)
+
+    for player in playersToMove:
+        #get the table with the fewest players
+        seatedPlayers = Result.objects.filter(game=game, state=Result.PLAYING).exclude(table=table)
+
+        playercounts = [0] * (table - 1)
+        for activePlayer in seatedPlayers:
+
+            playercounts[activePlayer.table - 1] += 1
+
+        newTable = playercounts.index(min(playercounts)) + 1
+        #move player to that table
+        newSeat = getRandomOpenSeatForTable(game, newTable)
+
+        print "Moving %s from %d-%d to %d-%d" % (player.player, player.table, player.seat, newTable, newSeat)
+        player.table = newTable
+        player.seat = newSeat
+        player.save()
+
+#balances tables, distributing players in game to some number of tables
+#will move players from the most populated to the least populated
+def balanceTables(gameId, minimumNumberOfTables, maxPlayersPerTable):
+    game = Game.objects.get(id=gameId)
+    activePlayers = Result.objects.filter(game=game, state=Result.PLAYING)
+
+    currentTables = max(r.table for r in activePlayers)
+    print "current number of tables: %d" % currentTables
+
+    numberOfTables = minimumNumberOfTables
+    while len(activePlayers) > numberOfTables * maxPlayersPerTable:
+        numberOfTables += 1
+
+    if currentTables > numberOfTables:
+        return breakTable(game, currentTables)
+
+    minPlayersPerTable = math.ceil(len(activePlayers)/numberOfTables)
+
+    playercounts = [0] * numberOfTables
+    for activePlayer in activePlayers:
+        playercounts[activePlayer.table - 1] += 1
+
+    print "Current table counts: "
+    print playercounts
+
+    # check if we're balanced already
+    if (min(playercounts) >= minPlayersPerTable):
+        print "tables are balanced.  not moving anyone"
+        return
+
+    # nope.
+    # move one from the most populated table
+    overloadedTable = playercounts.index(max(playercounts)) + 1
+    mover = choice(Result.objects.filter(game=game, state=Result.PLAYING, table=overloadedTable))
+
+    #get a new empty seat from the other table
+    newTable = playercounts.index(min(playercounts)) + 1;
+    newSeat = getRandomOpenSeatForTable(game, newTable)
+
+    print "Moving %s from %d-%d to %d-%d" % (mover.player, mover.table, mover.seat, newTable, newSeat)
+    mover.seat = newSeat
+    mover.table = newTable
+    mover.save()
+
+#reseats a single specific player.  could be handy
+def reseatSinglePlayer(gameId, playerId):
+
+    game = Game.objects.get(id=gameId)
+    player = Player.objects.get(id=playerId)
+
+    result = Result.objects.filter(game=game, player=player)[0]
+    result.state = Result.PLAYING
+
+    table, seat = getRandomOpenSeat(game)
+    result.table = table
+    result.seat = seat
+
+    result.save()
+
+# locks game down.  prevents new players from registering.  reseating will now reduce down to 1 table if possible
+def lockGame(gameId):
+    setGameState(gameId, Game.STARTED_LOCKED)
+
+def startGame(gameId):
+    setGameState(gameId, Game.STARTED)
+
+def setGameState(gameId, newState):
+    game = Game.objects.get(id=gameId)
+    game.gameState = newState
+    game.save()
+
+# eliminates the player from the game
+def elminatePlayer(gameId, playerId):
+    game = Game.objects.get(id=gameId)
+    player = Player.objects.get(id=playerId)
+
+    result = Result.objects.filter(game=game, player=player)[0]
+
+    playersStillActive = Result.objects.filter(game=game, state=Result.PLAYING)
+    eliminatedResults = Result.objects.filter(game=game, state=Result.FINISHED).order_by('place')
+
+    result.place = len(playersStillActive)
+    result.amountWon = payouts.getPrizeForPlace(
+        len(playersStillActive) + len(eliminatedResults),
+        result.place,
+        game.buyin
+    )
+
+    result.state = Result.FINISHED
+    result.save()
+    print "Eliminating %s in %s place" % (player.nickname, result.placeAsOrdinal)
+
+# un-does player elimination in case of mistake.  will place them in their old seat.
+# if people have been reseated we may have problems.
+def undoElminatePlayer(gameId, playerId):
+    game = Game.objects.get(id=gameId)
+    player = Player.objects.get(id=playerId)
+
+    result = Result.objects.filter(game=game, player=player)[0]
+
+    result.place = None
+    result.amountWon = 0
+
+    result.state = Result.PLAYING
+    result.save()
+    print "un-Eliminating %s" % (player.nickname)

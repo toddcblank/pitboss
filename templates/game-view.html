@@ -1,0 +1,125 @@
+{% include "header.html" %}
+<link rel="stylesheet" href="/static/css/game-view.css"/>
+<script type="text/javascript" src="/static/javascript/gameView.js"></script>
+
+<div id="payouts" class="payout-table">
+    <div class="table-bordered">
+        <div class="row">
+            <div class="twocol">Payouts</div>
+        </div>
+        {% for payout in payouts %}
+            <div class="row">
+                <div class="cell twocol">{{ forloop.counter }}</div>
+                <div class="cell twocol">${{ payout }}0</div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<a href="javascript:balanceTables();">Balance Tables</a>
+<div id="player-lists">
+    <div id="in-game-players" class="players-in-game">
+
+
+        <div>Active Players</div>
+        <div id="active-players">
+            <div id="active-table-1" class="table-bordered">
+                <div class="row">
+                    <div class="cell varcol">Table</div>
+                    <div class="cell varcol">Seat</div>
+                    <div class="cell varcol">Player</div>
+                    <div class="cell varcol"></div>
+                    <div class="cell varcol"></div>
+                </div>
+                {% for result in gamePlayerList %}
+                    <div class="row">
+                        <div class="cell varcol">{{ result.table }}</div>
+                        <div class="cell varcol">{{ result.seat }}</div>
+                        <div class="cell varcol">{{ result.player.nickname }}</div>
+                        <div class="cell varcol"><a href="javascript:eliminatePlayer({{ result.player.id }});">Eliminate!</a>
+                        </div>
+                        <div class="cell varcol"><a href="javascript:unseatPlayer({{ result.player.id }});">Unseat
+                            Player</a></div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div>Eliminated Players</div>
+        <div id="eliminated-players">
+            <div id="eliminated-players-table" class="table-bordered">
+                <div class="row">
+                    <div class="cell threecol">Place</div>
+                    <div class="cell threecol">Player</div>
+                    <div class="cell threecol"></div>
+                </div>
+                {% for result in finishedPlayers %}
+                    <div class="row">
+                        <div class="cell threecol">{{ result.place }}</div>
+                        <div class="cell threecol">{{ result.player.nickname }}</div>
+                        <div class="cell threecol">
+                            {% if forloop.first %}
+                                <a href="javascript:undoElimination({{ result.player.id }});">Undo Elimination</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% if interestList|length > 0 %}
+    <div id="playerlist-interested" class="player-interested">
+        <div>Interested Players</div>
+        <div id="player-feed" class="table-bordered">
+        <div id="interested-players">
+            <div id="interested-players-table" class="table">
+                {% for player in interestList %}
+                    <div class="row">
+                        <div class="cell twocol">{{ player.nickname }}</div>
+                        <div class="cell twocol"><a href="javascript:seatPlayer({{ player.id }});">Seat Player</a></div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+<div id="all-other-players">
+    <div>Available Players:</div>
+    <div id="available-players">
+        <div id="available-players-table" class="table-bordered">
+            <div class="row">
+                <div class="cell twocol">Player</div>
+                <div class="cell twocol"></div>
+            </div>
+            {% for player in otherPlayers %}
+                <div class="row">
+                    <div class="cell twocol">{{ player.nickname }}</div>
+                    <div class="cell twocol"><a href="javascript:seatPlayer({{ player.id }});">Seat Player</a></div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<form id="seat-player" action="seat-player" method="POST">
+    {% csrf_token %}
+    <input type="hidden" id="seat-player-playerId" name="playerId" value="-1"/>
+</form>
+
+<form id="eliminate-player" action="eliminate-player" method="POST">
+    {% csrf_token %}
+    <input type="hidden" id="eliminate-player-playerId" name="playerId" value="-1"/>
+</form>
+
+<form id="undo-eliminate-player" action="undo-eliminate-player" method="POST">
+    {% csrf_token %}
+    <input type="hidden" id="undo-eliminate-player-playerId" name="playerId" value="-1"/>
+</form>
+
+<form id="unseat-player" action="unseat-player" method="POST">
+    {% csrf_token %}
+    <input type="hidden" id="unseat-player-playerId" name="playerId" value="-1"/>
+</form>
+
+<form id="balance-tables" action="balance-tables" method="POST">
+    {% csrf_token %}
+</form>

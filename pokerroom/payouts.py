@@ -27,8 +27,6 @@ PAYOUTS = {
 
 
 def getPrizeForPlace(players, place, buyin):
-    print PAYOUTS
-    print PAYOUTS[players]
     if place > len(PAYOUTS[players]):
         return 0
 

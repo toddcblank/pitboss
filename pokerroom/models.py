@@ -78,8 +78,20 @@ class Game(models.Model):
         (NL_TEXAS_HOLDEM, "NL Texas Hold'em Tournament")
     ]
 
+    SEATING = 0
+    STARTED = 1
+    STARTED_LOCKED = 2
+    FINISHED = 3
+    GAME_STATES = [
+        (SEATING, "Seating players"),
+        (STARTED, "In progress, accepting new players"),
+        (STARTED_LOCKED, "In progress, no longer accepting new players"),
+        (FINISHED, "Completed")
+    ]
+
     buyin = models.FloatField()
     gameType = models.IntegerField(default=0, choices=GAME_TYPES)
+    gameState = models.IntegerField(default=SEATING, choices=GAME_STATES)
     datePlayed = models.DateTimeField()
 
     def asDict(self):
@@ -87,6 +99,7 @@ class Game(models.Model):
             "id": self.id,
             "buyin": self.buyin,
             "gameType": self.get_gameType_display(),
+            "state": self.gameState,
             "datePlayed": self.datePlayed.__str__()
         }
 
@@ -99,7 +112,6 @@ class Game(models.Model):
 
 
 class Result(models.Model):
-    PAID = 4
     FINISHED = 3
     PLAYING = 2
     INTERESTED = 1
@@ -111,13 +123,13 @@ class Result(models.Model):
         (PLAYING, "Playing"),
         (INTERESTED, "Interested"),
         (NOT_SPECIFIED, "Not Specified"),
-        (NOT_INTERESTED, "Not Interested"),
-        (PAID, "Paid")
+        (NOT_INTERESTED, "Not Interested")
     ]
 
     game = models.ForeignKey(Game)
     player = models.ForeignKey(Player)
     seat = models.IntegerField(blank=True, null=True)
+    table = models.IntegerField(blank=True, null=True)
     place = models.IntegerField(blank=True, null=True)
     amountWon = models.FloatField(default=0)
     state = models.IntegerField(default=NOT_SPECIFIED, choices=RESULT_STATE)
