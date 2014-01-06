@@ -268,7 +268,7 @@ def createGame(request):
             game=game,
             player=player)
         result.save()
-    return redirect("/pokerroom/game/%d/signup-form" % game.id)
+    return redirect("/pokerroom/game/%d/game-view" % game.id)
 
 def createGameForm(request):
     return render(request, 'create-game-form.html')
@@ -440,19 +440,19 @@ def interestListJson(request, gameId):
         'interestList': [i.asDict() for i in sortedInterestList]
     }), content_type="application/json")
 
-@login_required(login_url='/pokerroom/login')
+# @login_required(login_url='/pokerroom/login')
 def signupPlayerForGame(request, gameId):
     playerId = request.POST['playerId']
     print 'Adding interest for player %s in game %s' % (playerId, gameId)
     return updatePlayerInterestInGame(playerId, gameId, Result.INTERESTED)
 
-@login_required(login_url='/pokerroom/login')
+# @login_required(login_url='/pokerroom/login')
 def approvePlayerForGame(request, gameId):
     playerId = request.POST['playerId']
     print 'Adding interest for player %s in game %s' % (playerId, gameId)
     return updatePlayerInterestInGame(playerId, gameId, Result.PLAYING)
 
-@login_required(login_url='/pokerroom/login')
+# @login_required(login_url='/pokerroom/login')
 def unsignupPlayerForGame(request, gameId):
     playerId = request.POST['playerId']
     print 'Removing interest for player %s in game %s' % (playerId, gameId)
@@ -489,7 +489,7 @@ class allGames(generic.ListView):
         return sorted(Game.objects.all(), key=lambda x: x.datePlayed, reverse=True)
 
 
-@login_required(login_url='/pokerroom/login')
+# @login_required(login_url='/pokerroom/login')
 def gameSignup(request, gameId):
     game = Game.objects.get(id=gameId)
 
