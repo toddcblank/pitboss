@@ -3,7 +3,7 @@
 
 <ul>
     {% for player in players %}
-        <li><a href="/pokerroom/player/{{ player.id }}">{{ player }}</a></li>
+        <li><a href="{{ appLocation }}player/{{ player.id }}">{{ player }}</a></li>
     {% endfor %}
 </ul>
 

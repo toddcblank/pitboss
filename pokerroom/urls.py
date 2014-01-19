@@ -28,6 +28,7 @@ urlpatterns = patterns('',
     url(r'^game/(?P<gameId>\d+)/undo-eliminate-player?$', gameViews.undoElminatePlayerPost, name="undoElminatePlayer"),
     url(r'^game/(?P<gameId>\d+)/unseat-player?$', gameViews.unseatPlayerPost, name="unseatPlayerPost"),
     url(r'^game/(?P<gameId>\d+)/balance-tables?$', gameViews.balanceTablesPost, name="balanceTablesPost"),
+    url(r'^game/(?P<gameId>\d+)/reseat-players?$', gameViews.reseatPlayersPost, name="reseatPlayersPost"),
     url(r'^game/(?P<gameId>\d+)/player-interested?$', gameViews.playerInterestedPost, name="playerInterestedPost"),
     url(r'^game/?$', gameViews.allGames.as_view(), name="allGames"),
 

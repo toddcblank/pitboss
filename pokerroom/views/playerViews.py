@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views import generic
 from pokerroom.models import Player, Result
-
+from django.conf import settings
 
 class playerPriorityList(generic.ListView):
     template_name = 'all-players.html'
@@ -60,7 +60,7 @@ def createPlayer(request):
     player = Player(nickname=nickname)
     player.save()
 
-    return redirect("/pokerroom/player")
+    return redirect(settings.PITBOSS_APP_LOCATION + "player")
 
 
 def createPlayerForm(request):

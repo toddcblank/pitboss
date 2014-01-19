@@ -3,7 +3,7 @@
 {% include "header.html" %}
 <h1>All Games</h1>
 {% for game in games %}
-    <a href="/pokerroom/game/{{ game.id }}">{{ game }}</a><br/>
+    <a href="{{ appLocation }}game/{{ game.id }}">{{ game }}</a><br/>
 {% endfor %}
 
-<a href="/pokerroom/game/create-form">New Game</a>
+<a href="{{ appLocation }}game/create-form">New Game</a>

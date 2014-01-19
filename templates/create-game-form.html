@@ -1,6 +1,6 @@
 {% include "header.html" %}
 <body>
-    <form action="/pokerroom/game/create" method="post">
+    <form action="{{ appLocation }}game/create" method="post">
         {% csrf_token %}
         <p>Date: <input type="text" name="datePlayed" id="datepicker" /></p>
         <p>Buyin:  <input type="text" name="buyin" value="20"/></p>

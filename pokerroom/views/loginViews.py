@@ -2,6 +2,7 @@ __author__ = 'Todd'
 
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
+from django.conf import settings
 
 def loginPage(request):
     if request.method == "POST":
@@ -11,6 +12,6 @@ def loginPage(request):
         if user is not None and user.is_active:
             login(request, user)
 
-            return redirect('/pokerroom/game')
+            return redirect(settings.PITBOSS_APP_LOCATION + 'game')
 
     return render(request, 'login.html')

@@ -1,7 +1,7 @@
 {% include "header.html" %}
 <body>
-<a href="/pokerroom/game/{{ game.id }}/signup-form">Signup Page</a>
-<a href="/pokerroom/game/{{ game.id }}/view-game-in-progress">View Game In Progress</a>
+<a href="{{ appLocation }}game/{{ game.id }}/signup-form">Signup Page</a>
+<a href="{{ appLocation }}game/{{ game.id }}/view-game-in-progress">View Game In Progress</a>
 <table class="table  table-hover">
     <thead>
     <td>Place</td>
@@ -12,13 +12,13 @@
     {% for result in currentResults %}
         <tr>
             <td>{{ result.place }}</td>
-{#            <td><a href="/pokerroom/player/{{ result.player.id }}"><img src="http://www.gravatar.com/avatar/{{ result.player.gravatarId }}"/></a></td>#}
-            <td><a href="/pokerroom/player/{{ result.player.id }}">{{ result.player.nickname }}</a></td>
+{#            <td><a href="{{ appLocation }}player/{{ result.player.id }}"><img src="http://www.gravatar.com/avatar/{{ result.player.gravatarId }}"/></a></td>#}
+            <td><a href="{{ appLocation }}player/{{ result.player.id }}">{{ result.player.nickname }}</a></td>
             <td>${{ result.amountWon }}</td>
             <td>{{ result.poyPoints}}</td>
         </tr>
     {% endfor %}
 </table>
-    <a href="/pokerroom/result/{{ game.id }}/add-result">Add Result</a>
+    <a href="{{ appLocation }}result/{{ game.id }}/add-result">Add Result</a>
 </body>
 </html>

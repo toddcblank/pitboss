@@ -17,6 +17,11 @@ function balanceTables() {
     form.submit();
 }
 
+function reseatPlayers() {
+    var form = $('#reseat-players')
+    form.submit();
+}
+
 function seatPlayer(playerId) {
 
     var form = $('#seat-player')

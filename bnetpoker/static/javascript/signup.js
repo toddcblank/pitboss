@@ -36,7 +36,7 @@ function approve(userId) {
 
 function reloadInterestTable(gameId) {
     $.getJSON(
-        '/pokerroom/game/' + gameId + '/signups',
+        '/game/' + gameId + '/signups',
         function (data) {
 
             var $newTable = $("<table class='table table-hover' id='interestTable'><thead><td colspan='4' style='text-align: center' >Interest List</td></thead></table>");

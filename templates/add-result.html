@@ -2,7 +2,7 @@
 
 <body>
 
-<form action="/pokerroom/result/{{ game.id }}/add-result" method="post">
+<form action="{{ appLocation }}result/{{ game.id }}/add-result" method="post">
     {% csrf_token %}
     Player: <select name="playerId">
     {% for player in players %}
@@ -10,7 +10,7 @@
             <option value="{{ player.id }}">{{ player }}</option>
         {% endif %}
     {% endfor %}
-</select> <a href="/pokerroom/player/create-form" target="_blank">Add New</a>
+</select> <a href="{{ appLocation }}player/create-form" target="_blank">Add New</a>
     <br/>
     Seat: <input type="text" name="seat"/><br/>
     Place: <input type="place" name="place" value="{{ nextPlace }}"/><br/>

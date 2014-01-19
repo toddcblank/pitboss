@@ -14,7 +14,7 @@ from datetime import date
 from django.db.models import Q
 from pokerroom import payouts
 from random import choice
-
+from django.conf import settings
 
 def pointsLeaderboard(request):
     players = Player.objects.all()
@@ -76,7 +76,7 @@ def login(request):
 
         if user is not None and user.is_active:
             login(request, user)
-            return redirect('/pokerroom/game')
+            return redirect(settings.PITBOSS_APP_LOCATION + 'game')
 
     return render(request, 'login.html')
 
@@ -183,11 +183,11 @@ def removePlayerFromGameInProgress(request, gameId):
         result.place = result.place - 1
         result.save()
 
-    return redirect("/pokerroom/game/%d/view-game-in-progress" % game.id)
+    return redirect(settings.PITBOSS_APP_LOCATION + "game/%d/view-game-in-progress" % game.id)
 
 #NYI - would be nice to be able to just add people as a game has started.  Need to think of a good way to do this.
 def addPlayerToGameInProgress(request, gameId):
-    return redirect("/pokerroom/game/%d/view-game-in-progress" % game.id)
+    return redirect(settings.PITBOSS_APP_LOCATION + "game/%d/view-game-in-progress" % game.id)
 
 
 def updatePlayerInterestInGame(playerId, gameId, newState):
@@ -249,7 +249,7 @@ def createPlayer(request):
     player = Player(nickname=nickname)
     player.save()
 
-    return redirect("/pokerroom/player")
+    return redirect(settings.PITBOSS_APP_LOCATION + "pokerroom/player")
 
 
 def createGame(request):
@@ -268,7 +268,7 @@ def createGame(request):
             game=game,
             player=player)
         result.save()
-    return redirect("/pokerroom/game/%d/game-view" % game.id)
+    return redirect(settings.PITBOSS_APP_LOCATION + "game/%d/game-view" % game.id)
 
 def createGameForm(request):
     return render(request, 'create-game-form.html')
@@ -291,7 +291,7 @@ def viewGameInProgress(request, gameId):
 
     results = Result.objects.filter(Q(game=game, state=Result.PLAYING) | Q(game=game, state=Result.FINISHED))
     if len(results) == 0:
-        return redirect("/pokerroom/game/%d/signup-form" % game.id)
+        return redirect(settings.PITBOSS_APP_LOCATION + "game/%d/signup-form" % game.id)
 
     model = {
         "game": game,
@@ -344,7 +344,7 @@ def startGame(request, gameId):
             result.save()
             seatIndex += 1
 
-    return redirect("/pokerroom/game/%d/view-game-in-progress" % game.id)
+    return redirect(settings.PITBOSS_APP_LOCATION + "game/%d/view-game-in-progress" % game.id)
 
 
 # Unseats everyone, essentially unstarting the game.
@@ -359,7 +359,7 @@ def unstartGame(request, gameId):
     model = {
         "playerList": results
     }
-    return redirect("/pokerroom/game/%d/signup-form" % game.id)
+    return redirect(settings.PITBOSS_APP_LOCATION + "game/%d/signup-form" % game.id)
 
 
 
@@ -564,29 +564,34 @@ def seatPlayerPost(request, gameId):
     if 'playerId' in request.POST:
         seatPlayerInGame(gameId, request.POST['playerId'])
 
-    return redirect("/pokerroom/game/%s/game-view" % gameId)
+    return redirect(settings.PITBOSS_APP_LOCATION + "game/%s/game-view" % gameId)
 
 def elminatePlayerPost(request, gameId):
     if 'playerId' in request.POST:
         elminatePlayer(gameId, request.POST['playerId'])
 
-    return redirect("/pokerroom/game/%s/game-view" % gameId)
+    return redirect(settings.PITBOSS_APP_LOCATION + "game/%s/game-view" % gameId)
 
 def undoElminatePlayerPost(request, gameId):
     if 'playerId' in request.POST:
         undoElminatePlayer(gameId, request.POST['playerId'])
 
-    return redirect("/pokerroom/game/%s/game-view" % gameId)
+    return redirect(settings.PITBOSS_APP_LOCATION + "game/%s/game-view" % gameId)
 
 def unseatPlayerPost(request, gameId):
     if 'playerId' in request.POST:
         unseatPlayer(gameId, request.POST['playerId'])
 
-    return redirect("/pokerroom/game/%s/game-view" % gameId)
+    return redirect(settings.PITBOSS_APP_LOCATION + "game/%s/game-view" % gameId)
 
 def balanceTablesPost(request, gameId):
     balanceTables(gameId, 1, 10)
-    return redirect("/pokerroom/game/%s/game-view" % gameId)
+    return redirect(settings.PITBOSS_APP_LOCATION + "game/%s/game-view" % gameId)
+
+def reseatPlayersPost(request, gameId):
+    reseatAllPlayers(gameId)
+    return redirect(settings.PITBOSS_APP_LOCATION + "game/%s/game-view" % gameId)
+
 
 def playerInterestedPost(request, gameId):
     game = Game.objects.get(id=gameId)
@@ -595,7 +600,7 @@ def playerInterestedPost(request, gameId):
         playerResult = Result.objects.filter(game=game, player=player)[0]
         playerResult.state = Result.INTERESTED
         playerResult.save()
-    return redirect("/pokerroom/game/%s/game-view" % gameId)
+    return redirect(settings.PITBOSS_APP_LOCATION + "game/%s/game-view" % gameId)
 ### Common Methods ###
 def seatPlayerInGame(gameId, playerId):
     game = Game.objects.get(id=gameId)
@@ -722,6 +727,27 @@ def reseatSinglePlayer(gameId, playerId):
     result.seat = seat
 
     result.save()
+
+def reseatAllPlayers(gameId):
+
+    game = Game.objects.get(id=gameId);
+    players = Result.objects.filter(game=game, state=Result.PLAYING)
+
+    for player in players:
+        if player.seat == 1 and player.table == 1:
+            continue
+
+        unseatPlayer(gameId, player.player.id)
+
+    for player in players:
+        if player.seat == 1 and player.table == 1:
+            continue
+
+        seatPlayerInGame(gameId, player.player.id)
+
+    balanceTables(gameId, 1, 10)
+
+
 
 # locks game down.  prevents new players from registering.  reseating will now reduce down to 1 table if possible
 def lockGame(gameId):

@@ -17,11 +17,12 @@
 </div>
 
 <a href="javascript:balanceTables();">Balance Tables</a>
+<a href="javascript:reseatPlayers();">Reseat Players</a>
 <div id="player-lists">
     <div id="in-game-players" class="players-in-game">
 
 
-        <div class="table-label-header">Active Players</div>
+        <div class="table-label-header">Active Players ({{ gamePlayerList|length }})</div>
         <div id="active-players">
             <div id="active-table-1" class="table-bordered">
                 <div class="row">
@@ -44,7 +45,7 @@
                 {% endfor %}
             </div>
         </div>
-        <div class="table-label-header">Eliminated Players</div>
+        <div class="table-label-header">Eliminated Players ({{ finishedPlayers|length }})</div>
         <div id="eliminated-players">
             <div id="eliminated-players-table" class="table-bordered">
                 <div class="row">
@@ -68,7 +69,7 @@
     </div>
     {% if interestList|length > 0 %}
     <div id="playerlist-interested" class="player-interested">
-        <div class="table-label-header">Interested Players</div>
+        <div class="table-label-header">Interested Players ({{ interestList|length }})</div>
         <div id="player-feed" class="table-bordered">
         <div id="interested-players">
             <div id="interested-players-table" class="table">
@@ -129,4 +130,8 @@
 <form id="player-interested" action="player-interested" method="POST">
     {% csrf_token %}
     <input type="hidden" id="interested-player-playerId" name="playerId" value="-1"/>
+</form>
+
+<form id="reseat-players" action="reseat-players" method="POST">
+    {% csrf_token %}
 </form>

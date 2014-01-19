@@ -20,7 +20,7 @@
         </thead>
     {% for result in results %}
         <tr>
-        <td><a href="/pokerroom/game/{{ result.game.id }}">{{ result.game }}</a></td>
+        <td><a href="{{ appLocation }}game/{{ result.game.id }}">{{ result.game }}</a></td>
         <td>{{ result.place }}</td>
         <td>{{ result.profit }}</td>
         <td>{{ result.poyPoints}}</td>
