@@ -1,14 +1,14 @@
-.table {width: 50%; height: auto; padding: 0;}
+.table {width: 50%; height: auto; padding: 5px;}
 .row {width: 100%; min-height: 1px; height: auto; margin: 0;}
 div.row:nth-child(even) {background: #CCC}
 div.row:nth-child(odd) {background: #FFF}
-.cell {float: left; margin: 0; padding: 0;}
+.cell {float: left; margin: 0; }
 .onecol {width: 100%;}
 .twocol {width: 50%;}
 .threecol {width: 33%;}
 .varcol {width: 20%;}
-.players-in-game {width:45%; display:inline-block;}
+.players-in-game {padding-top:15px padding-left:15px; width:45%; display:inline-block;}
 .player-interested {width:45%; height:auto; float: right; display:inline-block}
-.payout-table {width:20%;}
-.all-players {width:30%;}
-.table-label-header {font-style:bold; font-size:22px;}
+.payout-table {padding-left:15px; width:20%;}
+.all-players {padding-left:15px; width:30%;}
+.table-label-header {padding:15px; font-style:bold; font-size:22px;}

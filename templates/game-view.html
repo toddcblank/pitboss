@@ -74,8 +74,9 @@
             <div id="interested-players-table" class="table">
                 {% for player in interestList %}
                     <div class="row">
-                        <div class="cell twocol">{{ player.nickname }}</div>
-                        <div class="cell twocol"><a href="javascript:seatPlayer({{ player.id }});">Seat Player</a></div>
+                        <div class="cell threecol">{{ forloop.counter }}</div>
+                        <div class="cell threecol">{{ player.nickname }}</div>
+                        <div class="cell threecol"><a href="javascript:seatPlayer({{ player.id }});">Seat Player</a></div>
                     </div>
                 {% endfor %}
             </div>
