@@ -240,7 +240,7 @@ def createPlayerAndSignupForGame(request, gameId):
 
     result.save()
 
-    return HttpResponse(json.dumps({"success": True}), content_type="application/json")
+    return redirect(settings.PITBOSS_APP_LOCATION + "game/%d/game-view" % game.id)
 
 
 def createPlayer(request):
@@ -283,22 +283,13 @@ def viewResult(request, gameId):
         'game': game,
     }
 
-    return render(request, "view-result.html", model)
+
+    return redirect(settings.PITBOSS_APP_LOCATION + "game/%d/game-view" % game.id)
 
 
 def viewGameInProgress(request, gameId):
-    game = Game.objects.get(id=gameId)
 
-    results = Result.objects.filter(Q(game=game, state=Result.PLAYING) | Q(game=game, state=Result.FINISHED))
-    if len(results) == 0:
-        return redirect(settings.PITBOSS_APP_LOCATION + "game/%d/signup-form" % game.id)
-
-    model = {
-        "game": game,
-        "playerList": sorted(results, key=lambda x: x.seat),
-        "payouts": [payout * game.buyin for payout in payouts.PAYOUTS[len(results)]]
-    }
-    return render(request, "view-game-in-progress.html", model)
+    return redirect(settings.PITBOSS_APP_LOCATION + "game/%s/game-view" % gameId)
 
 
 """
@@ -427,7 +418,7 @@ def createPlayerAndSignupForGame(request, gameId):
 
     result.save()
 
-    return HttpResponse(json.dumps({"success": True}), content_type="application/json")
+    return redirect(settings.PITBOSS_APP_LOCATION + "game/%d/game-view" % game.id)
 
 def interestListJson(request, gameId):
     game = Game.objects.get(id=gameId)

@@ -103,6 +103,16 @@
         </div>
     </div>
 </div>
+
+<div id="new-player-entry">
+    <form name="signup" id="create-and-signup" action="{{ appLocation }}game/{{ game.id }}/signup-newplayer" method="POST">
+        {% csrf_token %}
+        <input type="text" id="create-and-signup-nickname" name="nickname"
+               value="New User"/>
+        <input type="submit" value="Signup New Player"/>
+    </form>
+</div>
+
 <form id="seat-player" action="seat-player" method="POST">
     {% csrf_token %}
     <input type="hidden" id="seat-player-playerId" name="playerId" value="-1"/>
