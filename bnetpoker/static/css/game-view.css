@@ -7,8 +7,9 @@ div.row:nth-child(odd) {background: #FFF}
 .twocol {width: 50%;}
 .threecol {width: 33%;}
 .varcol {width: 20%;}
-.players-in-game {padding-top:15px padding-left:15px; width:45%; display:inline-block;}
+.players-in-game {padding-top:15px; padding-left:15px; width:45%; display:inline-block;}
 .player-interested {width:45%; height:auto; float: right; display:inline-block}
-.payout-table {padding-left:15px; width:20%;}
+.payout-table {padding-left:115px; width:20%;}
 .all-players {padding-left:15px; width:30%;}
 .table-label-header {padding:15px; font-style:bold; font-size:22px;}
+.pokertable-seating-options {padding-top:45px; padding-left:15px;}

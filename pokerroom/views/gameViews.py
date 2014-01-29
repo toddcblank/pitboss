@@ -576,7 +576,13 @@ def unseatPlayerPost(request, gameId):
     return redirect(settings.PITBOSS_APP_LOCATION + "game/%s/game-view" % gameId)
 
 def balanceTablesPost(request, gameId):
-    balanceTables(gameId, 1, 10)
+
+    if 'collapseTables' in request.POST and request.POST['collapseTables'] == 'true':
+        balanceTables(gameId, 1, 10)
+    else:
+
+        balanceTables(gameId, 2, 10)
+
     return redirect(settings.PITBOSS_APP_LOCATION + "game/%s/game-view" % gameId)
 
 def reseatPlayersPost(request, gameId):

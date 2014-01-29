@@ -16,8 +16,14 @@
     </div>
 </div>
 
-<a href="javascript:balanceTables();">Balance Tables</a>
-<a href="javascript:reseatPlayers();">Reseat Players</a>
+<div class="pokertable-seating-options">
+    <label for="collapse-table-option">
+    <input class="checkbox" type="checkbox" id="collapse-table-option" />
+    Collapse tables if possible</label>
+    <a href="javascript:balanceTables();">Balance Tables</a>
+    <a href="javascript:reseatPlayers();">Reseat Players</a>
+</div>
+
 <div id="player-lists">
     <div id="in-game-players" class="players-in-game">
 
@@ -134,6 +140,7 @@
 </form>
 
 <form id="balance-tables" action="balance-tables" method="POST">
+    <input type="hidden" id="balance-collapseTables" name="collapseTables" value="false" />
     {% csrf_token %}
 </form>
 
@@ -143,5 +150,6 @@
 </form>
 
 <form id="reseat-players" action="reseat-players" method="POST">
+    <input type="hidden" id="reseat-collapseTables" name="collapseTables" value="false" />
     {% csrf_token %}
 </form>

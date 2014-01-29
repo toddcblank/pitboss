@@ -14,6 +14,7 @@ function playerInterested(playerId) {
 function balanceTables() {
 
     var form = $('#balance-tables')
+    $('#balance-collapseTables').val($('#collapse-table-option').is(":checked"))
     form.submit();
 }
 
